@@ -1,0 +1,458 @@
+@import "tailwindcss";
+
+/* Family names here have to match the strings in ring/params.js — nameFont,
+   idxFont and textFont are looked up by name, not imported. */
+
+/* Project names and disciplines. Two real weights, so nameWeight 400 and 500
+   both resolve to a cut rather than a synthesised one. */
+@font-face {
+  font-family: "Satoshi";
+  src: url("/Satoshi-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/Satoshi-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Numbers, years and the load counter. */
+@font-face {
+  font-family: "Geist";
+  src: url("/Geist-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* The intro heading and the cursor tag, both rasterised to canvas. Book is
+   the only cut installed, so textWeight has nothing to switch between. */
+@font-face {
+  font-family: "PP Neue Montreal";
+  src: url("/ppneuemontreal-book.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --page-ivory: #f7f4ee;
+  --page-ink: #12110f;
+  --page-accent: #9b6a38;
+  --admin-bg: #f5f5f2;
+  --admin-surface: rgba(255, 255, 255, 0.92);
+  --admin-surface-strong: #ffffff;
+  --admin-surface-soft: #f6f4ef;
+  --admin-border: rgba(34, 42, 55, 0.08);
+  --admin-border-strong: rgba(34, 42, 55, 0.14);
+  --admin-ink: #202938;
+  --admin-muted: rgba(32, 41, 56, 0.62);
+  --admin-faint: rgba(32, 41, 56, 0.42);
+  --admin-accent: #1699a3;
+  --admin-accent-soft: rgba(22, 153, 163, 0.12);
+  --admin-shadow: 0 18px 40px rgba(19, 29, 43, 0.06);
+  --admin-shadow-soft: 0 10px 24px rgba(19, 29, 43, 0.05);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--page-ivory);
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+canvas {
+  display: block;
+}
+
+.editorial-shell {
+  width: min(1600px, 100%);
+  margin-inline: auto;
+  padding-inline: clamp(1.5rem, 8vw, 8rem);
+}
+
+.editorial-hero {
+  padding-top: clamp(7rem, 12vw, 9rem);
+}
+
+.editorial-accent-square {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--page-accent);
+}
+
+.editorial-brand-name {
+  max-width: min(100%, 9ch);
+  font-family: "PP Neue Montreal", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(6rem, 9vw, 8.75rem);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  color: var(--page-ink);
+}
+
+.editorial-role-title {
+  max-width: min(100%, 12ch);
+  font-family: "PP Neue Montreal", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(3.5rem, 5.2vw, 4.75rem);
+  line-height: 1.01;
+  letter-spacing: -0.028em;
+  color: var(--page-ink);
+}
+
+.editorial-page-title {
+  max-width: min(100%, 11ch);
+  font-family: "PP Neue Montreal", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(4rem, 7vw, 7rem);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+  color: var(--page-ink);
+}
+
+.editorial-support-copy {
+  max-width: 26rem;
+  font-family: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.98rem, 1.15vw, 1.05rem);
+  line-height: 1.9;
+  color: rgb(18 17 15 / 0.62);
+}
+
+@media (max-width: 1024px) {
+  .editorial-brand-name,
+  .editorial-page-title {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .editorial-hero {
+    padding-top: calc(72px + 3rem);
+  }
+
+  .editorial-brand-name {
+    font-size: clamp(4.2rem, 16vw, 5.75rem);
+    line-height: 0.95;
+  }
+
+  .editorial-role-title {
+    font-size: clamp(2.75rem, 11vw, 4rem);
+    line-height: 1.03;
+  }
+
+  .editorial-page-title {
+    font-size: clamp(3.1rem, 13vw, 4.8rem);
+    line-height: 0.98;
+  }
+}
+
+.glass-nav,
+.glass-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.38)),
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.75), transparent 55%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+
+.glass-nav {
+  border-radius: 9999px;
+}
+
+.glass-panel {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 0;
+}
+
+@keyframes projects-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.projects-marquee,
+.editorial-marquee {
+  display: inline-block;
+  min-width: max-content;
+  animation: projects-marquee 24s linear infinite;
+}
+
+.admin-workspace {
+  background: var(--admin-bg);
+  color: var(--admin-ink);
+}
+
+.admin-panel {
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  background: var(--admin-surface);
+}
+
+.admin-panel-soft {
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  background: var(--admin-surface-soft);
+}
+
+.admin-panel-muted {
+  border: 1px solid rgba(34, 42, 55, 0.06);
+  border-radius: 12px;
+  background: rgba(248, 247, 243, 0.95);
+}
+
+.admin-divider {
+  border-color: rgba(34, 42, 55, 0.08);
+}
+
+.admin-kicker {
+  font-family: ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono",
+    Menlo, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--admin-faint);
+}
+
+.admin-mono {
+  font-family: ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono",
+    Menlo, monospace;
+}
+
+.admin-display {
+  font-family: "PP Neue Montreal", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.05em;
+  color: var(--admin-ink);
+}
+
+.admin-body-copy {
+  color: var(--admin-muted);
+}
+
+.admin-nav-shell {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.admin-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-height: 38px;
+  border-radius: 10px;
+  padding: 0.55rem 0.9rem;
+  font-family: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.admin-button:hover {
+  transform: translateY(-1px);
+}
+
+.admin-button-primary {
+  border: 1px solid transparent;
+  background: var(--admin-accent);
+  color: white;
+}
+
+.admin-button-secondary {
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface-strong);
+  color: var(--admin-ink);
+}
+
+.admin-button-ghost {
+  border: 1px solid rgba(34, 42, 55, 0.06);
+  background: transparent;
+  color: var(--admin-muted);
+}
+
+.admin-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(22, 153, 163, 0.18);
+  border-radius: 9999px;
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+}
+
+.admin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 1.75rem;
+  border: 1px solid rgba(34, 42, 55, 0.08);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 0.28rem 0.64rem;
+  font-family: ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono",
+    Menlo, monospace;
+  font-size: 0.74rem;
+  color: var(--admin-muted);
+}
+
+.admin-input,
+.admin-textarea {
+  width: 100%;
+  border: 1px solid rgba(34, 42, 55, 0.08);
+  border-radius: 10px;
+  background: rgba(248, 247, 243, 0.96);
+  padding: 0.72rem 0.85rem;
+  font-family: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.92rem;
+  color: var(--admin-ink);
+  outline: none;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+.admin-input::placeholder,
+.admin-textarea::placeholder {
+  color: rgba(32, 41, 56, 0.36);
+}
+
+.admin-input:focus,
+.admin-textarea:focus {
+  border-color: rgba(22, 153, 163, 0.32);
+  box-shadow: 0 0 0 3px rgba(22, 153, 163, 0.08);
+  background: white;
+}
+
+.admin-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-page-title {
+  font-family: "PP Neue Montreal", ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(1.9rem, 2vw, 2.25rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--admin-ink);
+}
+
+.admin-section-title {
+  font-family: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--admin-ink);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  padding: 0 0 0.75rem;
+  font-family: ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono",
+    Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 400;
+  text-align: left;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--admin-faint);
+}
+
+.admin-table td {
+  padding: 0.9rem 0;
+  border-top: 1px solid rgba(34, 42, 55, 0.08);
+  vertical-align: middle;
+}
+
+.admin-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 9999px;
+  padding: 0.25rem 0.55rem;
+  font-family: ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono",
+    Menlo, monospace;
+  font-size: 0.69rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-status[data-status="published"] {
+  background: rgba(22, 153, 163, 0.1);
+  color: #0f7f88;
+}
+
+.admin-status[data-status="draft"] {
+  background: rgba(32, 41, 56, 0.07);
+  color: rgba(32, 41, 56, 0.7);
+}
+
+.admin-status[data-status="archived"] {
+  background: rgba(174, 87, 52, 0.1);
+  color: #8d563c;
+}
+
+.admin-dropdown {
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  background: white;
+  box-shadow: var(--admin-shadow-soft);
+}
+
+@media (max-width: 768px) {
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table,
+  .admin-table tbody,
+  .admin-table tr,
+  .admin-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-table td {
+    padding: 0;
+    border-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-button {
+    min-height: 36px;
+    padding-inline: 0.8rem;
+  }
+}
