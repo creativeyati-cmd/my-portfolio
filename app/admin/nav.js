@@ -12,6 +12,12 @@ export const ADMIN_NAV_ITEMS = [
     description: "Manage work, videos, and pages",
   },
   {
+    href: "/admin/categories",
+    label: "Categories",
+    icon: "categories",
+    description: "Services, structure, and category organization",
+  },
+  {
     href: "/admin/analytics",
     label: "Analytics",
     icon: "analytics",

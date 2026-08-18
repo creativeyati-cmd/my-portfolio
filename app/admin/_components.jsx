@@ -50,6 +50,9 @@ export function getToastMessage(toast) {
     "settings-updated": "Settings updated.",
     "content-updated": "Content updated.",
     "contact-updated": "Contact details updated.",
+    "category-saved": "Category saved.",
+    "category-deleted": "Category deleted.",
+    "categories-bulk-updated": "Categories updated.",
     "project-created": "Project created.",
     "project-saved": "Changes saved.",
     "project-published": "Project published.",
@@ -57,6 +60,8 @@ export function getToastMessage(toast) {
     "project-archived": "Project archived.",
     "project-deleted": "Project deleted.",
     "project-duplicated": "Project duplicated.",
+    "service-saved": "Service saved.",
+    "service-deleted": "Service deleted.",
     "account-updated": "Account updated.",
   };
 
@@ -261,7 +266,13 @@ export function AccountForm({ account, redirectTo }) {
   );
 }
 
-export function ProjectEditorForm({ project, categories = [], redirectTo, mode = "edit" }) {
+export function ProjectEditorForm({
+  project,
+  categories = [],
+  typeOptions = [],
+  redirectTo,
+  mode = "edit",
+}) {
   const formId = `project-editor-${project?.id || "new"}`;
   const isNew = mode === "new";
   const status = project?.status || "draft";
@@ -376,14 +387,26 @@ export function ProjectEditorForm({ project, categories = [], redirectTo, mode =
                 ]}
               />
               <SelectField
-                label="Category"
-                name="type"
-                defaultValue={project?.type || categories[0] || ""}
+                label="Project category"
+                name="categoryId"
+                defaultValue={String(project?.categoryId || "")}
                 options={[
-                  ...(project?.type && !categories.includes(project.type)
+                  { value: "", label: "Unassigned" },
+                  ...categories.map((category) => ({
+                    value: String(category.id),
+                    label: category.name,
+                  })),
+                ]}
+              />
+              <SelectField
+                label="Project type"
+                name="type"
+                defaultValue={project?.type || typeOptions[0] || ""}
+                options={[
+                  ...(project?.type && !typeOptions.includes(project.type)
                     ? [{ value: project.type, label: project.type }]
                     : []),
-                  ...categories.map((category) => ({ value: category, label: category })),
+                  ...typeOptions.map((category) => ({ value: category, label: category })),
                 ]}
               />
               <Field label="Year" name="year" defaultValue={project?.year || "2026"} />

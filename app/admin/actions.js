@@ -5,13 +5,20 @@ import { redirect } from "next/navigation";
 
 import { logoutAdmin, requireAdmin } from "@/lib/auth";
 import {
+  bulkUpdateCategoryStatus,
   createActivity,
+  deleteCategory,
   deleteProject,
+  deleteService,
   duplicateProject,
   getAdminAccount,
+  getCategoryById,
   getProjectById,
   getSiteSettings,
+  listCategories,
+  saveCategory,
   saveProject,
+  saveService,
   updateAdminAccount,
   updateProjectStatus,
   updateSiteSettings,
@@ -45,6 +52,7 @@ function revalidateAdmin() {
   revalidatePath("/contact");
   revalidatePath("/projects");
   revalidatePath("/admin");
+  revalidatePath("/admin/categories");
   revalidatePath("/admin/projects");
   revalidatePath("/admin/analytics");
   revalidatePath("/admin/settings");
@@ -58,19 +66,21 @@ export async function logoutAction() {
 export async function saveSiteSettingsAction(formData) {
   await requireAdmin();
 
-  const current = getSiteSettings();
+  const current = await getSiteSettings();
   const redirectTo = redirectTarget(formData, "/admin/settings/content");
   const savedState = value(formData, "savedState") || "settings-updated";
 
-  updateSiteSettings({
+  await updateSiteSettings({
     siteTitle: mergeSettingField(formData, current, "siteTitle"),
     siteDescription: mergeSettingField(formData, current, "siteDescription"),
     introHeading: mergeSettingField(formData, current, "introHeading"),
     introSubheading: mergeSettingField(formData, current, "introSubheading"),
     navHomeLabel: mergeSettingField(formData, current, "navHomeLabel"),
+    navServicesLabel: mergeSettingField(formData, current, "navServicesLabel"),
     navProjectsLabel: mergeSettingField(formData, current, "navProjectsLabel"),
     navAboutLabel: mergeSettingField(formData, current, "navAboutLabel"),
     navContactLabel: mergeSettingField(formData, current, "navContactLabel"),
+    navContactCtaLabel: mergeSettingField(formData, current, "navContactCtaLabel"),
     selectedProjectLabel: mergeSettingField(formData, current, "selectedProjectLabel"),
     playVideoLabel: mergeSettingField(formData, current, "playVideoLabel"),
     aboutTitle: mergeSettingField(formData, current, "aboutTitle"),
@@ -162,7 +172,7 @@ export async function saveSiteSettingsAction(formData) {
     trackingId: mergeSettingField(formData, current, "trackingId"),
   });
 
-  createActivity({
+  await createActivity({
     title: "Settings updated",
     description: redirectTo.replace("/admin/settings/", "").replace("/admin/", ""),
     href: redirectTo,
@@ -178,7 +188,7 @@ export async function saveProjectAction(formData) {
   const redirectTo = redirectTarget(formData, "/admin/projects");
   const intent = value(formData, "intent") || "save";
   const id = Number(formData.get("id") || 0) || null;
-  const current = id ? getProjectById(id) : null;
+  const current = id ? await getProjectById(id) : null;
 
   const posterUpload = await saveUpload(formData.get("posterFile"), "images");
   const videoUpload = await saveUpload(formData.get("videoFile"), "videos");
@@ -193,11 +203,12 @@ export async function saveProjectAction(formData) {
           ? "archived"
           : explicitStatus;
 
-  const project = saveProject({
+  const project = await saveProject({
     id,
     slug: value(formData, "slug"),
     title: value(formData, "title"),
     type: value(formData, "type"),
+    categoryId: value(formData, "categoryId"),
     year: value(formData, "year"),
     posterPath: posterUpload || value(formData, "posterPath"),
     videoPath: videoUpload || value(formData, "videoPath"),
@@ -215,7 +226,7 @@ export async function saveProjectAction(formData) {
     sortOrder: value(formData, "sortOrder"),
   });
 
-  createActivity({
+  await createActivity({
     title:
       intent === "publish"
         ? `${project.title} was published`
@@ -244,15 +255,131 @@ export async function saveProjectAction(formData) {
   toastRedirect(destination, toast);
 }
 
+export async function saveCategoryAction(formData) {
+  await requireAdmin();
+
+  const redirectTo = redirectTarget(formData, "/admin/categories");
+  const category = await saveCategory({
+    id: value(formData, "id"),
+    slug: value(formData, "slug"),
+    name: value(formData, "name"),
+    description: value(formData, "description"),
+    color: value(formData, "color"),
+    icon: value(formData, "icon"),
+    displayOrder: value(formData, "displayOrder"),
+    status: value(formData, "status"),
+  });
+
+  await createActivity({
+    title: `${category.name} category saved`,
+    description: category.status,
+    href: "/admin/categories",
+  });
+
+  revalidateAdmin();
+  toastRedirect(redirectTo, "category-saved");
+}
+
+export async function deleteCategoryAction(formData) {
+  await requireAdmin();
+
+  const redirectTo = redirectTarget(formData, "/admin/categories");
+  const current = await deleteCategory(
+    value(formData, "id"),
+    value(formData, "replacementCategoryId") || null,
+  );
+
+  if (current) {
+    await createActivity({
+      title: `${current.name} category deleted`,
+      description: current.services.length
+        ? `${current.services.length} services affected`
+        : "No services attached",
+      href: "/admin/categories",
+    });
+  }
+
+  revalidateAdmin();
+  toastRedirect(redirectTo, "category-deleted");
+}
+
+export async function bulkUpdateCategoryStatusAction(formData) {
+  await requireAdmin();
+
+  const redirectTo = redirectTarget(formData, "/admin/categories");
+  const status = value(formData, "status");
+  const ids = formData.getAll("categoryIds");
+  const changes = await bulkUpdateCategoryStatus(ids, status);
+
+  if (changes) {
+    await createActivity({
+      title: `Category bulk update completed`,
+      description: `${changes} categories moved to ${status}`,
+      href: "/admin/categories",
+    });
+  }
+
+  revalidateAdmin();
+  toastRedirect(redirectTo, "categories-bulk-updated");
+}
+
+export async function saveServiceAction(formData) {
+  await requireAdmin();
+
+  const redirectTo = redirectTarget(formData, "/admin/categories");
+  const service = await saveService({
+    id: value(formData, "id"),
+    categoryId: value(formData, "categoryId"),
+    slug: value(formData, "slug"),
+    name: value(formData, "name"),
+    description: value(formData, "description"),
+    idealFor: value(formData, "idealFor"),
+    deliverables: value(formData, "deliverables"),
+    cta: value(formData, "cta"),
+    displayOrder: value(formData, "displayOrder"),
+    status: value(formData, "status"),
+  });
+  const category = await getCategoryById(service.categoryId);
+
+  await createActivity({
+    title: `${service.name} service saved`,
+    description: category?.name || "Service category",
+    href: "/admin/categories",
+  });
+
+  revalidateAdmin();
+  toastRedirect(redirectTo, "service-saved");
+}
+
+export async function deleteServiceAction(formData) {
+  await requireAdmin();
+
+  const redirectTo = redirectTarget(formData, "/admin/categories");
+  const service = await deleteService(value(formData, "id"));
+  const categories = await listCategories({ includeArchived: true });
+  const category = categories.find((item) => item.id === service?.categoryId);
+
+  if (service) {
+    await createActivity({
+      title: `${service.name} service deleted`,
+      description: category?.name || "Service category",
+      href: "/admin/categories",
+    });
+  }
+
+  revalidateAdmin();
+  toastRedirect(redirectTo, "service-deleted");
+}
+
 export async function deleteProjectAction(formData) {
   await requireAdmin();
   const redirectTo = redirectTarget(formData, "/admin/projects");
 
   const id = Number(formData.get("id") || 0);
-  const current = getProjectById(id);
+  const current = await getProjectById(id);
   if (current) {
-    deleteProject(id);
-    createActivity({
+    await deleteProject(id);
+    await createActivity({
       title: `${current.title} was deleted`,
       description: current.status,
       href: "/admin/projects",
@@ -268,10 +395,10 @@ export async function duplicateProjectAction(formData) {
   await requireAdmin();
   const redirectTo = redirectTarget(formData, "/admin/projects");
   const id = Number(formData.get("id") || 0);
-  const project = duplicateProject(id);
+  const project = await duplicateProject(id);
 
   if (project) {
-    createActivity({
+    await createActivity({
       title: `${project.title} was duplicated`,
       description: "draft",
       href: `/admin/projects/${project.id}/edit`,
@@ -288,10 +415,10 @@ export async function setProjectStatusAction(formData) {
   const redirectTo = redirectTarget(formData, "/admin/projects");
   const id = Number(formData.get("id") || 0);
   const status = value(formData, "status");
-  const project = updateProjectStatus(id, status);
+  const project = await updateProjectStatus(id, status);
 
   if (project) {
-    createActivity({
+    await createActivity({
       title: `${project.title} moved to ${project.status}`,
       description: project.status,
       href: `/admin/projects/${project.id}/edit`,
@@ -315,7 +442,7 @@ export async function updateAccountAction(formData) {
   const session = await requireAdmin();
   const redirectTo = redirectTarget(formData, "/admin/settings/account");
 
-  const result = updateAdminAccount({
+  const result = await updateAdminAccount({
     username: session.username,
     displayName: value(formData, "displayName"),
     email: value(formData, "email"),
@@ -328,8 +455,8 @@ export async function updateAccountAction(formData) {
     redirect(`${redirectTo}${separator}error=${encodeURIComponent(result.error)}`);
   }
 
-  const account = getAdminAccount(session.username);
-  createActivity({
+  const account = await getAdminAccount(session.username);
+  await createActivity({
     title: "Account settings updated",
     description: account?.displayName || session.username,
     href: "/admin/settings/account",

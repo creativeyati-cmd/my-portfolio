@@ -1,26 +1,40 @@
 # Deployment
 
-This app is ready for a **traditional Node.js server / VPS / container host**.
+This app is now ready for **PXXL-safe persistent hosting**.
 
-It is **not** a good fit for fully stateless serverless hosting in its current form because it uses:
+In production, the recommended setup is:
 
-- local SQLite for the portfolio database
-- local filesystem storage for uploaded images and videos
+- PXXL managed PostgreSQL for application data
+- PXXL CDN storage for uploaded posters and videos
+- environment variables for all runtime secrets and connection values
 
-## Requirements
+Local development can still use SQLite and local `public/uploads`.
 
-- Node.js 20+
-- a persistent writable directory for:
-  - SQLite data
-  - uploaded media
+## Recommended PXXL setup
+
+1. Create a managed PostgreSQL database in the PXXL dashboard.
+2. Copy the **external** database connection URL.
+3. Add it to the project as `DATABASE_URL`.
+4. Create a scoped PXXL API key with CDN upload permissions.
+5. Add that key as `PXXL_API_KEY`.
+6. Configure uploads to use the CDN:
+
+```bash
+PORTFOLIO_ASSET_STORAGE=pxxl-cdn
+PXXL_CDN_UPLOAD_URL=https://gateway.pxxl.dev/api/v3/cdn/assets
+PXXL_CDN_VISIBILITY=public
+PXXL_CDN_PUBLIC_BASE_URL=https://your-cdn-space-hostname
+```
+
+7. Redeploy the project after saving environment variables.
 
 ## Environment
 
-Copy [.env.example](/C:/Users/USER/Downloads/Viscose-carousel-main/.env.example) to `.env` on the server and set real values.
-
 Required in production:
 
+- `DATABASE_URL`
 - `ADMIN_USERNAME`
+- `ADMIN_EMAIL` if you want the first login to work with an email address
 - `ADMIN_PASSWORD`
 - `SESSION_SECRET`
 
@@ -28,29 +42,16 @@ Recommended:
 
 - `PORT=3001`
 - `HOSTNAME=0.0.0.0`
-- `PORTFOLIO_DATA_DIR=/absolute/path/to/shared/data`
-- `PORTFOLIO_DB_PATH=/absolute/path/to/shared/data/portfolio.sqlite`
-- `PORTFOLIO_UPLOADS_DIR=/absolute/path/to/shared/public/uploads`
-- `PORTFOLIO_UPLOADS_URL_PREFIX=/uploads`
+- `PORTFOLIO_ASSET_STORAGE=pxxl-cdn`
+- `PXXL_API_KEY`
+- `PXXL_CDN_PUBLIC_BASE_URL`
 
-## Important persistence rule
+Local or VPS fallback only:
 
-If you redeploy by replacing the app directory, do **not** keep the database and uploads inside disposable build output.
-
-Use persistent mounted folders for:
-
-- database
-- uploads
-
-Example:
-
-```bash
-PORTFOLIO_DATA_DIR=/var/www/portfolio/shared/data
-PORTFOLIO_DB_PATH=/var/www/portfolio/shared/data/portfolio.sqlite
-PORTFOLIO_UPLOADS_DIR=/var/www/portfolio/current/public/uploads
-```
-
-If uploads are stored outside the app root, your server must still expose them at `PORTFOLIO_UPLOADS_URL_PREFIX`.
+- `PORTFOLIO_DATA_DIR`
+- `PORTFOLIO_DB_PATH`
+- `PORTFOLIO_UPLOADS_DIR`
+- `PORTFOLIO_UPLOADS_URL_PREFIX`
 
 ## Build
 
@@ -58,8 +59,6 @@ If uploads are stored outside the app root, your server must still expose them a
 npm install
 npm run build
 ```
-
-This project now builds with Next.js `output: "standalone"`.
 
 ## Start
 
@@ -73,31 +72,22 @@ That runs:
 node .next/standalone/server.js
 ```
 
-Use a process manager in production, for example:
+## Persistence notes
 
-- `pm2`
-- `systemd`
-- Docker
-
-## Reverse proxy
-
-Put the Node app behind Nginx, Caddy, or another reverse proxy.
-
-Typical proxy responsibilities:
-
-- HTTPS termination
-- domain routing
-- compression
-- cache rules for static assets
+- The app automatically uses PostgreSQL when `DATABASE_URL` is present.
+- If `DATABASE_URL` is missing, it falls back to local SQLite.
+- Uploaded assets are stored in PXXL CDN only when `PORTFOLIO_ASSET_STORAGE=pxxl-cdn`.
+- If the PXXL CDN response does not include a direct asset URL, set `PXXL_CDN_PUBLIC_BASE_URL`.
+- Database migrations are idempotent and run on startup.
 
 ## First login
 
-On first boot, the app seeds the admin account from:
+On first boot, the admin account is seeded from:
 
 - `ADMIN_USERNAME`
 - `ADMIN_PASSWORD`
 
-If an existing SQLite file already exists, those values do not overwrite the existing user automatically.
+If a database already contains a user, those values do not overwrite the existing account.
 
 ## Verify after deploy
 
@@ -105,9 +95,10 @@ Check these routes:
 
 - `/`
 - `/projects`
+- `/about`
+- `/contact`
+- `/login`
 - `/admin`
-- `/admin/projects`
-- `/admin/settings/general`
 
 Then test:
 

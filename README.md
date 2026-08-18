@@ -52,17 +52,22 @@ Built with Next.js 16 (App Router), React 19, Three.js, GSAP and Tailwind v4.
 
 ## Production hosting
 
-This project can now be deployed to a **persistent Node.js host** and builds as a
-Next.js **standalone** app.
+This project builds as a Next.js **standalone** app and is ready for **PXXL-safe
+persistent hosting**.
 
-Important:
+Recommended production stack:
 
-- it uses **SQLite**
-- it stores uploaded media on the **filesystem**
-- it therefore needs **persistent writable storage**
+- **PXXL managed PostgreSQL** via `DATABASE_URL`
+- **PXXL CDN storage** for uploaded media
+- **environment variables** for credentials and runtime config
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the server checklist, required
-environment variables, and persistence setup.
+Local development still supports:
+
+- **SQLite**
+- **local filesystem uploads**
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the PXXL setup, required environment
+variables, and the local fallback options.
 
 > **PP Neue Montreal is bundled for development only** and is not licensed for
 > commercial use by this project. See [Fonts](#fonts).

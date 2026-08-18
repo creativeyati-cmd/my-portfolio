@@ -1,5 +1,5 @@
 import GlassNav from "@/components/GlassNav";
-import { getSiteSettings } from "@/lib/db";
+import { getSiteSettings, listCategories } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -25,11 +25,14 @@ function ContactLink({ href, label, value }) {
 }
 
 export default async function ContactPage() {
-  const settings = getSiteSettings();
+  const [settings, serviceCategories] = await Promise.all([
+    getSiteSettings(),
+    listCategories({ includeServices: true }),
+  ]);
 
   return (
     <main className="min-h-screen bg-[#f7f4ee] py-24 text-[#111]">
-      <GlassNav currentPath="/contact" labels={settings} />
+      <GlassNav currentPath="/contact" labels={settings} serviceCategories={serviceCategories} />
 
       <div className="editorial-shell editorial-hero">
         <section className="grid gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(300px,0.58fr)]">

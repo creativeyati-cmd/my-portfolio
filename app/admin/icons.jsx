@@ -34,6 +34,7 @@ export const ADMIN_ICONS = {
   arrow: ArrowRight01Icon,
   back: ArrowLeft01Icon,
   calendar: Calendar03Icon,
+  categories: ChartBarLineIcon,
   check: CheckmarkCircle02Icon,
   contact: Mail01Icon,
   content: Edit01Icon,

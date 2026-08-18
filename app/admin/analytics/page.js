@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-import { listActivities } from "@/lib/db";
+import { getCategoryAnalytics, listActivities } from "@/lib/db";
 
-import { EmptyState, PageHeader, SectionHeader } from "../_components";
+import { EmptyState, PageHeader, SectionHeader, StatusBadge } from "../_components";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,10 @@ const DATE_RANGES = [
 export default async function AdminAnalyticsPage({ searchParams }) {
   const params = await searchParams;
   const range = params?.range || "30d";
-  const activities = listActivities(8);
+  const [activities, analytics] = await Promise.all([
+    listActivities(8),
+    getCategoryAnalytics(),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -63,6 +66,77 @@ export default async function AdminAnalyticsPage({ searchParams }) {
         title="No analytics yet."
         description="Visitor data will appear here once your portfolio starts receiving tracked traffic."
       />
+
+      <section className="space-y-4" id="categories">
+        <SectionHeader title="Category overview" />
+        <div className="admin-panel overflow-x-auto bg-white">
+          <table className="min-w-full text-left text-sm">
+            <thead className="border-b border-black/8 text-[11px] uppercase tracking-[0.18em] text-black/42">
+              <tr>
+                <th className="px-5 py-4 font-medium">Category</th>
+                <th className="px-5 py-4 font-medium">Services</th>
+                <th className="px-5 py-4 font-medium">Inquiries</th>
+                <th className="px-5 py-4 font-medium">Projects</th>
+                <th className="px-5 py-4 font-medium">Time spent</th>
+                <th className="px-5 py-4 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {analytics.categories.map((category) => (
+                <tr
+                  key={category.id}
+                  id={`category-${category.slug}`}
+                  className="border-b border-black/6 last:border-none"
+                >
+                  <td className="px-5 py-4">
+                    <p className="font-medium text-[#202938]">{category.name}</p>
+                    {category.description ? (
+                      <p className="mt-1 text-sm text-black/52">{category.description}</p>
+                    ) : null}
+                  </td>
+                  <td className="px-5 py-4 text-black/62">{category.analytics?.servicesCount ?? "—"}</td>
+                  <td className="px-5 py-4 text-black/62">—</td>
+                  <td className="px-5 py-4 text-black/62">{category.analytics?.projectCount ?? "—"}</td>
+                  <td className="px-5 py-4 text-black/62">—</td>
+                  <td className="px-5 py-4">
+                    <StatusBadge status={category.status} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <SectionHeader title="Per-service breakdown" />
+        <div className="admin-panel overflow-x-auto bg-white">
+          <table className="min-w-full text-left text-sm">
+            <thead className="border-b border-black/8 text-[11px] uppercase tracking-[0.18em] text-black/42">
+              <tr>
+                <th className="px-5 py-4 font-medium">Service</th>
+                <th className="px-5 py-4 font-medium">Category</th>
+                <th className="px-5 py-4 font-medium">Inquiries</th>
+                <th className="px-5 py-4 font-medium">Projects completed</th>
+                <th className="px-5 py-4 font-medium">Avg. time spent</th>
+                <th className="px-5 py-4 font-medium">Last inquiry</th>
+              </tr>
+            </thead>
+            <tbody>
+              {analytics.services.map((service) => (
+                <tr key={service.id} className="border-b border-black/6 last:border-none">
+                  <td className="px-5 py-4 font-medium text-[#202938]">{service.name}</td>
+                  <td className="px-5 py-4 text-black/62">{service.categoryName}</td>
+                  <td className="px-5 py-4 text-black/62">—</td>
+                  <td className="px-5 py-4 text-black/62">—</td>
+                  <td className="px-5 py-4 text-black/62">—</td>
+                  <td className="px-5 py-4 text-black/62">—</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section className="space-y-4">
         <SectionHeader title="Recent activity" />

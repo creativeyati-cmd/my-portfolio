@@ -5,10 +5,16 @@ import { getSiteSettings } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
-  const settings = getSiteSettings();
+  const settings = await getSiteSettings();
+  const baseUrl = settings.portfolioUrl || "https://aivideocreator.cv/";
+
   return {
+    metadataBase: new URL(baseUrl),
     title: settings.siteTitle,
     description: settings.siteDescription,
+    alternates: {
+      canonical: "/",
+    },
   };
 }
 

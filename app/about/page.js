@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import GlassNav from "@/components/GlassNav";
-import { getSiteSettings } from "@/lib/db";
+import { getSiteSettings, listCategories } from "@/lib/db";
 import { buildRoleLines } from "@/lib/editorial";
 
 export const dynamic = "force-dynamic";
@@ -35,37 +35,23 @@ function PulseStat({ value, label }) {
 }
 
 export default async function AboutPage() {
-  const settings = getSiteSettings();
+  const [settings, serviceCategories] = await Promise.all([
+    getSiteSettings(),
+    listCategories({ includeServices: true }),
+  ]);
   const skills = splitLines(settings.skillsList);
   const openTo = splitLines(settings.openToList);
   const roleLines = buildRoleLines(settings.aboutBody || settings.introSubheading || "");
-  const services = [
-    {
-      name: settings.serviceOneName,
-      description: settings.serviceOneDescription,
-      idealFor: settings.serviceOneIdealFor,
-      deliverables: settings.serviceOneDeliverables,
-      cta: settings.serviceOneCta,
-    },
-    {
-      name: settings.serviceTwoName,
-      description: settings.serviceTwoDescription,
-      idealFor: settings.serviceTwoIdealFor,
-      deliverables: settings.serviceTwoDeliverables,
-      cta: settings.serviceTwoCta,
-    },
-    {
-      name: settings.serviceThreeName,
-      description: settings.serviceThreeDescription,
-      idealFor: settings.serviceThreeIdealFor,
-      deliverables: settings.serviceThreeDeliverables,
-      cta: settings.serviceThreeCta,
-    },
-  ].filter((service) => service.name);
+  const services = serviceCategories.flatMap((category) => category.services || []);
+  const activeCategories = serviceCategories.filter((category) => category.status === "active");
 
   return (
     <main className="min-h-screen bg-[#f7f4ee] py-24 text-[#141311]">
-      <GlassNav currentPath="/about" labels={settings} />
+      <GlassNav
+        currentPath="/about"
+        labels={settings}
+        serviceCategories={activeCategories}
+      />
 
       <div className="editorial-shell editorial-hero">
         <section className="grid gap-12 xl:grid-cols-[minmax(0,0.92fr)_minmax(260px,0.4fr)] xl:items-start">
@@ -103,7 +89,8 @@ export default async function AboutPage() {
             </div>
             {eyebrow("Profile pulse")}
             <div className="mt-6 space-y-6">
-              <PulseStat value={String(services.length).padStart(2, "0")} label="Core offerings" />
+              <PulseStat value={String(activeCategories.length).padStart(2, "0")} label="Categories" />
+              <PulseStat value={String(services.length).padStart(2, "0")} label="Services" />
               <PulseStat value={String(skills.length).padStart(2, "0")} label="Practice areas" />
               <PulseStat value={String(openTo.length).padStart(2, "0")} label="Open collaborations" />
             </div>
@@ -149,49 +136,93 @@ export default async function AboutPage() {
       </section>
 
       <div className="editorial-shell">
-        <section className="mt-16 sm:mt-20">
+        <section className="mt-16 sm:mt-20" id="services">
           {eyebrow(settings.servicesTitle)}
-          <div className="mt-6 space-y-0">
-            {services.map((service, index) => (
-              <article
-                key={service.name}
-                className="grid gap-6 border-t border-black/10 py-8 md:grid-cols-[90px_minmax(0,0.8fr)_minmax(260px,0.5fr)]"
-              >
-                <div className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
-                  {String(index + 1).padStart(2, "0")}
-                </div>
-                <div>
-                  <h2 className="font-['PP_Neue_Montreal'] text-[2.4rem] leading-[0.94] tracking-[-0.085em] text-[#12110f] sm:text-[3.4rem]">
-                    {service.name}
-                  </h2>
-                  <p className="mt-4 max-w-[34rem] font-['Satoshi'] text-sm leading-7 text-black/62 sm:text-[15px] sm:leading-8">
-                    {service.description}
-                  </p>
-                </div>
-                <div className="space-y-5">
-                  <div>
-                    <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/42">
-                      {settings.serviceIdealForLabel}
-                    </p>
-                    <p className="mt-2 font-['Satoshi'] text-sm leading-7 text-black/62">
-                      {service.idealFor}
-                    </p>
+          <div className="mt-6 space-y-12">
+            {activeCategories.map((category, categoryIndex) => (
+              <section key={category.id} id={`category-${category.slug}`} className="border-t border-black/10 pt-8">
+                <div className="grid gap-6 xl:grid-cols-[120px_minmax(0,0.7fr)_minmax(280px,0.45fr)]">
+                  <div className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
+                    {String(categoryIndex + 1).padStart(2, "0")}
                   </div>
                   <div>
-                    <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/42">
-                      {settings.serviceDeliverablesLabel}
-                    </p>
-                    <p className="mt-2 font-['Satoshi'] text-sm leading-7 text-black/62">
-                      {service.deliverables}
-                    </p>
+                    <h2 className="font-['PP_Neue_Montreal'] text-[2.6rem] leading-[0.92] tracking-[-0.085em] text-[#12110f] sm:text-[3.9rem]">
+                      {category.name}
+                    </h2>
+                    {category.description ? (
+                      <p className="mt-4 max-w-[38rem] font-['Satoshi'] text-sm leading-7 text-black/62 sm:text-[15px] sm:leading-8">
+                        {category.description}
+                      </p>
+                    ) : null}
                   </div>
-                  {service.cta ? (
-                    <p className="font-['Satoshi'] text-[11px] uppercase tracking-[0.22em] text-black/78">
-                      {service.cta}
-                    </p>
-                  ) : null}
+                  <div className="space-y-4 border-t border-black/8 pt-4 xl:border-t-0 xl:pt-0">
+                    <div>
+                      <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/42">
+                        Category pulse
+                      </p>
+                      <p className="mt-2 font-['Satoshi'] text-sm leading-7 text-black/62">
+                        {category.services.length} services available
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {category.services.map((service) => (
+                        <Link
+                          key={service.id}
+                          href={`#service-${service.slug}`}
+                          className="rounded-full border border-black/10 px-3 py-2 font-['Satoshi'] text-xs text-black/72"
+                        >
+                          {service.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </article>
+
+                <div className="mt-8 space-y-0">
+                  {category.services.map((service, serviceIndex) => (
+                    <article
+                      key={service.id}
+                      id={`service-${service.slug}`}
+                      className="grid gap-6 border-t border-black/8 py-8 md:grid-cols-[90px_minmax(0,0.8fr)_minmax(260px,0.5fr)]"
+                    >
+                      <div className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
+                        {String(serviceIndex + 1).padStart(2, "0")}
+                      </div>
+                      <div>
+                        <h3 className="font-['PP_Neue_Montreal'] text-[2.2rem] leading-[0.94] tracking-[-0.085em] text-[#12110f] sm:text-[3rem]">
+                          {service.name}
+                        </h3>
+                        <p className="mt-4 max-w-[34rem] font-['Satoshi'] text-sm leading-7 text-black/62 sm:text-[15px] sm:leading-8">
+                          {service.description}
+                        </p>
+                      </div>
+                      <div className="space-y-5">
+                        <div>
+                          <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/42">
+                            {settings.serviceIdealForLabel}
+                          </p>
+                          <p className="mt-2 font-['Satoshi'] text-sm leading-7 text-black/62">
+                            {service.idealFor}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/42">
+                            {settings.serviceDeliverablesLabel}
+                          </p>
+                          <p className="mt-2 font-['Satoshi'] text-sm leading-7 text-black/62">
+                            {service.deliverables}
+                          </p>
+                        </div>
+                        {service.cta ? (
+                          <p className="font-['Satoshi'] text-[11px] uppercase tracking-[0.22em] text-black/78">
+                            {service.cta}
+                          </p>
+                        ) : null}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         </section>

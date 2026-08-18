@@ -71,17 +71,28 @@ function ContentSection({ settings }) {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="About title" name="aboutPageTitle" defaultValue={settings.aboutPageTitle} />
-          <Textarea label="Biography" name="aboutNotesBody" defaultValue={settings.aboutNotesBody} rows={5} />
-          <Field label="Profile title" name="aboutBody" defaultValue={settings.aboutBody} />
-          <Textarea label="Introduction" name="aboutPageLead" defaultValue={settings.aboutPageLead} rows={3} />
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Services nav label" name="navServicesLabel" defaultValue={settings.navServicesLabel} />
+          <Field
+            label="Contact CTA label"
+            name="navContactCtaLabel"
+            defaultValue={settings.navContactCtaLabel}
+          />
           <Field label="Services title" name="servicesTitle" defaultValue={settings.servicesTitle} />
           <Field label="Skills title" name="skillsTitle" defaultValue={settings.skillsTitle} />
           <Textarea label="Skills list" name="skillsList" defaultValue={settings.skillsList} rows={6} />
           <Textarea label="Open to list" name="openToList" defaultValue={settings.openToList} rows={6} />
+        </div>
+
+        <div className="rounded-[16px] border border-black/8 bg-[#fbfaf7] px-4 py-4 text-sm leading-6 text-black/56">
+          Service categories and individual service cards are now managed from
+          <span className="font-medium text-[#202938]"> Categories</span> in the admin navigation.
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="About title" name="aboutPageTitle" defaultValue={settings.aboutPageTitle} />
+          <Textarea label="Biography" name="aboutNotesBody" defaultValue={settings.aboutNotesBody} rows={5} />
+          <Field label="Profile title" name="aboutBody" defaultValue={settings.aboutBody} />
+          <Textarea label="Introduction" name="aboutPageLead" defaultValue={settings.aboutPageLead} rows={3} />
         </div>
       </div>
     </SettingsForm>
@@ -166,9 +177,11 @@ function UnsupportedSection({ title }) {
 
 export default async function AdminSettingsSectionPage({ params, searchParams }) {
   const [{ section }, query] = await Promise.all([params, searchParams]);
-  const settings = getSiteSettings();
   const session = await requireAdmin();
-  const account = getAdminAccount(session.username);
+  const [settings, account] = await Promise.all([
+    getSiteSettings(),
+    getAdminAccount(session.username),
+  ]);
 
   const allowed = new Set([
     ...getSettingsItems().map((item) => item.key),

@@ -13,7 +13,9 @@
     "@hugeicons/react": "^1.1.9",
     "gsap": "^3.15.0",
     "lil-gui": "^0.21.0",
+    "mysql2": "^3.23.3",
     "next": "16.3.0",
+    "postgres": "^3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "three": "^0.185.1"
