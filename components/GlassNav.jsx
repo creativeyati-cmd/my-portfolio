@@ -124,7 +124,7 @@ export default function GlassNav({ labels, className = "" }) {
       <div className={`fixed inset-x-0 top-4 z-40 px-3 sm:top-6 ${className}`.trim()}>
         <div className="relative mx-auto flex max-w-[72rem] items-center justify-center">
           <nav
-            className="glass-nav flex w-full max-w-[46rem] items-center justify-between gap-2 px-2 py-2 sm:px-3"
+            className="glass-nav flex w-fit max-w-[calc(100vw-1.5rem)] items-center justify-between gap-2 px-2 py-2 sm:px-3 lg:w-full lg:max-w-[46rem]"
             aria-label="Primary"
           >
             <Link
@@ -163,13 +163,6 @@ export default function GlassNav({ labels, className = "" }) {
             <div className="flex items-center gap-2 lg:hidden">
               <button
                 type="button"
-                className="nav-link-chip nav-link-chip-selected"
-                onClick={openContact}
-              >
-                {inquiryLabel}
-              </button>
-              <button
-                type="button"
                 className="nav-link-chip"
                 onClick={() => setMenuOpen((value) => !value)}
                 aria-expanded={menuOpen}
@@ -193,7 +186,7 @@ export default function GlassNav({ labels, className = "" }) {
       {menuOpen ? (
         <div
           id="mobile-nav-panel"
-          className="glass-nav fixed left-1/2 top-[5.4rem] z-40 w-[calc(100%-1.5rem)] max-w-[26rem] -translate-x-1/2 rounded-[1.75rem] p-3 lg:hidden"
+          className="glass-sheet fixed left-1/2 top-[5.4rem] z-40 w-[min(18.5rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-[1.75rem] p-3 lg:hidden"
         >
           <div className="space-y-1">
             {links.map((link) => {
@@ -208,14 +201,24 @@ export default function GlassNav({ labels, className = "" }) {
                 </Link>
               );
             })}
+            <button
+              type="button"
+              className="nav-link-chip nav-link-chip-selected mt-2 w-full justify-center"
+              onClick={() => {
+                setMenuOpen(false);
+                openContact();
+              }}
+            >
+              {inquiryLabel}
+            </button>
           </div>
         </div>
       ) : null}
 
       {contactOpen ? (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-[rgba(18,17,15,0.16)] px-4 py-20 backdrop-blur-sm sm:py-24">
-          <div className="flex max-h-[calc(100vh-5rem)] w-full max-w-[42rem] flex-col overflow-hidden rounded-[1.75rem] border border-black/8 bg-[#f8f5ef] shadow-[0_28px_90px_rgba(0,0,0,0.12)]">
-            <div className="border-b border-black/8 p-6">
+          <div className="glass-sheet flex max-h-[calc(100vh-5rem)] w-full max-w-[42rem] flex-col overflow-hidden rounded-[1.75rem]">
+            <div className="border-b border-white/35 p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.24em] text-black/38">
@@ -241,7 +244,7 @@ export default function GlassNav({ labels, className = "" }) {
 
             <div className="flex-1 overflow-y-auto p-6">
               {hasEmbeddedInquiry ? (
-                <div className="overflow-hidden rounded-[1.25rem] border border-black/8 bg-white">
+                <div className="glass-card overflow-hidden rounded-[1.25rem]">
                   <iframe
                     src={inquiryEmbed}
                     title="Project inquiry form"
@@ -249,7 +252,7 @@ export default function GlassNav({ labels, className = "" }) {
                   />
                 </div>
               ) : inquiryUrl ? (
-                <div className="rounded-[1.25rem] border border-black/8 bg-white px-5 py-5">
+                <div className="glass-card rounded-[1.25rem] px-5 py-5">
                   <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
                     Inquiry form
                   </p>
@@ -258,7 +261,7 @@ export default function GlassNav({ labels, className = "" }) {
                   </p>
                 </div>
               ) : (
-                <div className="rounded-[1.25rem] border border-black/8 bg-white px-5 py-5">
+                <div className="glass-card rounded-[1.25rem] px-5 py-5">
                   <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
                     Inquiry form not added yet
                   </p>
@@ -286,7 +289,7 @@ export default function GlassNav({ labels, className = "" }) {
               </div>
             </div>
 
-            <div className="border-t border-black/8 p-6">
+            <div className="border-t border-white/35 p-6">
               <div className="flex flex-wrap gap-3">
                 {inquiryUrl ? (
                   <a
