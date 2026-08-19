@@ -57,7 +57,7 @@ persistent hosting**.
 
 Recommended production stack:
 
-- **PXXL managed PostgreSQL** via `DATABASE_URL`
+- **Supabase Postgres** or **PXXL managed PostgreSQL** via `DATABASE_URL`
 - **PXXL CDN storage** for uploaded media
 - **environment variables** for credentials and runtime config
 

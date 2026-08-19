@@ -4,20 +4,21 @@ This app is now ready for **PXXL-safe persistent hosting**.
 
 In production, the recommended setup is:
 
-- PXXL managed PostgreSQL for application data
+- Supabase Postgres or PXXL managed PostgreSQL for application data
 - PXXL CDN storage for uploaded posters and videos
 - environment variables for all runtime secrets and connection values
 
 Local development can still use SQLite and local `public/uploads`.
 
-## Recommended PXXL setup
+## Recommended setup
 
-1. Create a managed PostgreSQL database in the PXXL dashboard.
-2. Copy the **external** database connection URL.
+1. Create a Supabase Postgres project or a PXXL managed PostgreSQL database.
+2. Copy the connection URL.
 3. Add it to the project as `DATABASE_URL`.
-4. Create a scoped PXXL API key with CDN upload permissions.
-5. Add that key as `PXXL_API_KEY`.
-6. Configure uploads to use the CDN:
+4. If you are using Supabase on an IPv4-only host, prefer the Supavisor session pooler connection string on port `5432`.
+5. Create a scoped PXXL API key with CDN upload permissions.
+6. Add that key as `PXXL_API_KEY`.
+7. Configure uploads to use the CDN:
 
 ```bash
 PORTFOLIO_ASSET_STORAGE=pxxl-cdn
@@ -32,7 +33,7 @@ PXXL_CDN_PUBLIC_BASE_URL=https://your-cdn-space-hostname
 
 Required in production:
 
-- `DATABASE_URL`
+- `DATABASE_URL` or `SUPABASE_DB_URL`
 - `ADMIN_USERNAME`
 - `ADMIN_EMAIL` if you want the first login to work with an email address
 - `ADMIN_PASSWORD`
@@ -42,6 +43,7 @@ Recommended:
 
 - `PORT=3001`
 - `HOSTNAME=0.0.0.0`
+- `DATABASE_SSL=require`
 - `PORTFOLIO_ASSET_STORAGE=pxxl-cdn`
 - `PXXL_API_KEY`
 - `PXXL_CDN_PUBLIC_BASE_URL`
@@ -74,8 +76,9 @@ node .next/standalone/server.js
 
 ## Persistence notes
 
-- The app automatically uses PostgreSQL when `DATABASE_URL` is present.
+- The app automatically uses PostgreSQL when `DATABASE_URL` or `SUPABASE_DB_URL` is present.
 - If `DATABASE_URL` is missing, it falls back to local SQLite.
+- Supabase session pooler on port `5432` is recommended for long-lived app servers on IPv4-only networks.
 - Uploaded assets are stored in PXXL CDN only when `PORTFOLIO_ASSET_STORAGE=pxxl-cdn`.
 - If the PXXL CDN response does not include a direct asset URL, set `PXXL_CDN_PUBLIC_BASE_URL`.
 - Database migrations are idempotent and run on startup.
