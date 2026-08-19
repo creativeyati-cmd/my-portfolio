@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { logoutAction } from "./actions";
 import { AdminIcon } from "./icons";
 
+const LIVE_SITE_URL = "https://aivideocreator.cv/";
+
 function initials(value) {
   return String(value || "Admin")
     .split(/\s+/)
@@ -64,7 +66,7 @@ export default function AdminUserMenu({ username, displayName, email, portfolioU
 
           <div className="py-2">
             <Link
-              href={portfolioUrl || "/"}
+              href={portfolioUrl || LIVE_SITE_URL}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-3 rounded-[10px] px-3 py-2 text-sm text-[#202938] hover:bg-black/4"

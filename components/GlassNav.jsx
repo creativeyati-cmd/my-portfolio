@@ -154,7 +154,7 @@ export default function GlassNav({ labels, className = "" }) {
 
             <span aria-hidden="true" className="h-6 w-px shrink-0 bg-black/10 sm:h-7" />
 
-            <div className="flex items-center gap-1 sm:gap-1.5">
+            <div className="desktop-nav items-center gap-1 sm:gap-1.5">
               {links.map((link) => {
                 return (
                   <Link
@@ -180,7 +180,7 @@ export default function GlassNav({ labels, className = "" }) {
 
           <button
             type="button"
-            className="glass-nav nav-link-chip h-9 px-3 sm:h-10 sm:px-4 lg:hidden"
+            className="mobile-menu-trigger glass-nav nav-link-chip h-9 px-3 sm:h-10 sm:px-4"
             onClick={() => setMenuOpen((value) => !value)}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav-panel"
@@ -196,6 +196,20 @@ export default function GlassNav({ labels, className = "" }) {
           className="glass-sheet fixed left-1/2 top-[5.2rem] z-40 w-fit max-w-[calc(100vw-32px)] -translate-x-1/2 rounded-[1.75rem] p-3 lg:hidden"
         >
           <div className="flex flex-col gap-2">
+            {links.map((link) => {
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`${navItemClass({
+                    selected: routeMatches(pathname, link.href),
+                  })} w-full justify-center`}
+                  onClick={() => selectLink()}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <button
               type="button"
               className="nav-link-chip nav-link-chip-selected w-full justify-center"

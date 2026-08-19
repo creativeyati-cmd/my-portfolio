@@ -279,6 +279,24 @@ canvas {
   border-radius: 0;
 }
 
+.desktop-nav {
+  display: none;
+}
+
+.mobile-menu-trigger {
+  display: inline-flex;
+}
+
+@media (min-width: 1024px) {
+  .desktop-nav {
+    display: flex;
+  }
+
+  .mobile-menu-trigger {
+    display: none;
+  }
+}
+
 @keyframes projects-marquee {
   from {
     transform: translate3d(0, 0, 0);

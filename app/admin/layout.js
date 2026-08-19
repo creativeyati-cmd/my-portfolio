@@ -8,6 +8,8 @@ import AdminUserMenu from "./admin-user-menu";
 
 export const dynamic = "force-dynamic";
 
+const LIVE_SITE_URL = "https://aivideocreator.cv/";
+
 export default async function AdminLayout({ children }) {
   const session = await requireAdmin();
   const [account, settings] = await Promise.all([
@@ -31,7 +33,7 @@ export default async function AdminLayout({ children }) {
 
           <div className="ml-auto flex items-center gap-2">
             <Link
-              href={settings.portfolioUrl || "/"}
+              href={settings.portfolioUrl || LIVE_SITE_URL}
               target="_blank"
               rel="noreferrer"
               className="hidden rounded-[10px] px-3 py-2 text-sm text-[#202938] hover:bg-black/4 sm:inline-flex"
@@ -45,7 +47,7 @@ export default async function AdminLayout({ children }) {
               username={session.username}
               displayName={account?.displayName}
               email={account?.email}
-              portfolioUrl={settings.portfolioUrl || "/"}
+              portfolioUrl={settings.portfolioUrl || LIVE_SITE_URL}
             />
           </div>
         </div>
