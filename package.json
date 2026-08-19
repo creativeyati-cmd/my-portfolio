@@ -5,12 +5,13 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "node .next/standalone/server.js",
+    "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.2.3",
     "@hugeicons/react": "^1.1.9",
+    "@supabase/supabase-js": "^2.112.3",
     "gsap": "^3.15.0",
     "lil-gui": "^0.21.0",
     "mysql2": "^3.23.3",

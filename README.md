@@ -52,22 +52,21 @@ Built with Next.js 16 (App Router), React 19, Three.js, GSAP and Tailwind v4.
 
 ## Production hosting
 
-This project builds as a Next.js **standalone** app and is ready for **PXXL-safe
-persistent hosting**.
+This project is now set up for **Vercel + Supabase**.
 
 Recommended production stack:
 
-- **Supabase Postgres** or **PXXL managed PostgreSQL** via `DATABASE_URL`
-- **PXXL CDN storage** for uploaded media
-- **environment variables** for credentials and runtime config
+- **Vercel** for the Next.js app
+- **Supabase Postgres** via `DATABASE_URL`
+- **Supabase Storage** for uploaded media
 
 Local development still supports:
 
 - **SQLite**
 - **local filesystem uploads**
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the PXXL setup, required environment
-variables, and the local fallback options.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the Vercel environment variables,
+Supabase storage setup, and local fallback options.
 
 > **PP Neue Montreal is bundled for development only** and is not licensed for
 > commercial use by this project. See [Fonts](#fonts).
