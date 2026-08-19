@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-
-const NAV_SELECTION_KEY = "portfolio-nav-selection";
+import { useMemo, useState } from "react";
 
 function buildMonogram(value) {
   const parts = String(value || "IO")
@@ -16,16 +14,9 @@ function buildMonogram(value) {
   return parts.map((item) => item[0]).join("").toUpperCase();
 }
 
-function routeMatches(currentPath, href) {
-  return href === "/"
-    ? currentPath === "/"
-    : currentPath === href || currentPath.startsWith(`${href}/`);
-}
-
-function navItemClass({ current, selected }) {
+function navItemClass({ selected }) {
   return [
     "nav-link-chip",
-    current ? "nav-link-chip-current" : "",
     selected ? "nav-link-chip-selected" : "",
   ]
     .filter(Boolean)
@@ -57,16 +48,7 @@ function ContactLine({ label, value, href }) {
   );
 }
 
-export default function GlassNav({ currentPath = "/", labels, className = "" }) {
-  const [selectedHref, setSelectedHref] = useState(() => {
-    if (typeof window === "undefined") return "";
-
-    try {
-      return window.sessionStorage.getItem(NAV_SELECTION_KEY) || "";
-    } catch {
-      return "";
-    }
-  });
+export default function GlassNav({ labels, className = "" }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const monogram = buildMonogram(labels?.siteTitle);
@@ -80,24 +62,14 @@ export default function GlassNav({ currentPath = "/", labels, className = "" }) 
   const logoSrc = labels?.logoPath || labels?.siteLogo || labels?.brandLogoPath || "";
   const logoAlt = labels?.logoAlt || labels?.siteTitle || "Portfolio";
 
-  function selectLink(href) {
-    setSelectedHref(href);
+  function selectLink() {
     setMenuOpen(false);
     setContactOpen(false);
-
-    try {
-      window.sessionStorage.setItem(NAV_SELECTION_KEY, href);
-    } catch {}
   }
 
   function openContact() {
-    setSelectedHref("/contact");
     setContactOpen(true);
     setMenuOpen(false);
-
-    try {
-      window.sessionStorage.setItem(NAV_SELECTION_KEY, "/contact");
-    } catch {}
   }
 
   return (
@@ -110,7 +82,7 @@ export default function GlassNav({ currentPath = "/", labels, className = "" }) 
           href="/"
           aria-label={labels?.siteTitle || "Portfolio"}
           className="flex h-11 min-w-11 items-center justify-center rounded-full border border-black/8 bg-white/72 px-3 text-[#171512]/78 transition hover:bg-white"
-          onClick={() => selectLink("/")}
+          onClick={() => selectLink()}
         >
           {logoSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -122,17 +94,14 @@ export default function GlassNav({ currentPath = "/", labels, className = "" }) 
           )}
         </Link>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 lg:flex">
           {links.map((link) => {
-            const current = routeMatches(currentPath, link.href);
-            const selected = selectedHref === link.href && current;
-
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={navItemClass({ current, selected })}
-                onClick={() => selectLink(link.href)}
+                className={navItemClass({ selected: false })}
+                onClick={() => selectLink()}
               >
                 {link.label}
               </Link>
@@ -150,7 +119,7 @@ export default function GlassNav({ currentPath = "/", labels, className = "" }) 
 
         <button
           type="button"
-          className="nav-link-chip md:hidden"
+          className="nav-link-chip lg:hidden"
           onClick={() => setMenuOpen((value) => !value)}
           aria-expanded={menuOpen}
           aria-controls="mobile-nav-panel"
@@ -162,19 +131,16 @@ export default function GlassNav({ currentPath = "/", labels, className = "" }) 
       {menuOpen ? (
         <div
           id="mobile-nav-panel"
-          className="glass-nav fixed left-1/2 top-[5.4rem] z-40 w-[calc(100%-1.5rem)] max-w-[26rem] -translate-x-1/2 rounded-[1.75rem] p-3 md:hidden"
+          className="glass-nav fixed left-1/2 top-[5.4rem] z-40 w-[calc(100%-1.5rem)] max-w-[26rem] -translate-x-1/2 rounded-[1.75rem] p-3 lg:hidden"
         >
           <div className="space-y-1">
             {links.map((link) => {
-              const current = routeMatches(currentPath, link.href);
-              const selected = selectedHref === link.href && current;
-
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`${navItemClass({ current, selected })} w-full justify-start`}
-                  onClick={() => selectLink(link.href)}
+                  className={`${navItemClass({ selected: false })} w-full justify-start`}
+                  onClick={() => selectLink()}
                 >
                   {link.label}
                 </Link>
@@ -182,10 +148,7 @@ export default function GlassNav({ currentPath = "/", labels, className = "" }) 
             })}
             <button
               type="button"
-              className={`${navItemClass({
-                current: routeMatches(currentPath, "/contact"),
-                selected: selectedHref === "/contact" && contactOpen,
-              })} w-full justify-start`}
+              className={`${navItemClass({ selected: false })} w-full justify-start`}
               onClick={() => {
                 setMenuOpen(false);
                 openContact();

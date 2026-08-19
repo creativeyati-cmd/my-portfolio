@@ -45,6 +45,29 @@ export default async function ProjectPage({ params }) {
     .slice(0, 2);
   const deliverables = splitInline(project.tools);
   const credits = splitInline(project.credits);
+  const hasSummary = Boolean(String(project.longDescription || "").trim());
+  const hasPoster = Boolean(project.posterPath);
+  const hasSupportingMaterial = hasPoster || hasSummary || credits.length > 0;
+  const overviewItems = [
+    project.role
+      ? {
+          label: "Role",
+          value: project.role,
+        }
+      : null,
+    project.clientName
+      ? {
+          label: "Client",
+          value: project.clientName,
+        }
+      : null,
+    deliverables.length
+      ? {
+          label: "Deliverables",
+          value: deliverables.join(", "),
+        }
+      : null,
+  ].filter(Boolean);
 
   return (
     <main className="min-h-screen bg-[#f5f2ec] pb-20 pt-24 text-[#171512] sm:pb-24">
@@ -68,28 +91,18 @@ export default async function ProjectPage({ params }) {
             <div className="mb-6 flex justify-start xl:justify-end">
               <span aria-hidden="true" className="editorial-accent-square" />
             </div>
-            <div className="grid gap-5 border-t border-black/10 pt-5 text-sm leading-7 text-black/66">
-              <div>
-                <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
-                  Role
-                </p>
-                <p className="mt-2 font-['Satoshi'] text-base">{project.role || "Creative direction"}</p>
+            {overviewItems.length ? (
+              <div className="grid gap-5 border-t border-black/10 pt-5 text-sm leading-7 text-black/66">
+                {overviewItems.map((item) => (
+                  <div key={item.label}>
+                    <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
+                      {item.label}
+                    </p>
+                    <p className="mt-2 font-['Satoshi'] text-base">{item.value}</p>
+                  </div>
+                ))}
               </div>
-              <div>
-                <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
-                  Client
-                </p>
-                <p className="mt-2 font-['Satoshi'] text-base">{project.clientName || "Add client name in admin"}</p>
-              </div>
-              <div>
-                <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
-                  Deliverables
-                </p>
-                <p className="mt-2 font-['Satoshi'] text-base">
-                  {deliverables.length ? deliverables.join(", ") : "Add tools or deliverables in admin"}
-                </p>
-              </div>
-            </div>
+            ) : null}
           </div>
         </header>
 
@@ -132,43 +145,56 @@ export default async function ProjectPage({ params }) {
         </section>
 
         <section className="mt-16 editorial-grid gap-y-10 border-t border-black/10 pt-8">
-          <div className="col-span-12 xl:col-span-7">
-            {eyebrow("Supporting material")}
-            <div className="mt-5 grid gap-6 md:grid-cols-2">
-              <div className="aspect-[4/5] overflow-hidden bg-[#ddd7ce]">
-                {project.posterPath ? (
-                  <div
-                    className="h-full w-full bg-cover bg-center"
-                    style={{ backgroundImage: `url("${project.posterPath}")` }}
-                  />
-                ) : null}
-              </div>
-              <div className="space-y-6 border-t border-black/8 pt-5 md:border-t-0 md:pt-0">
-                <div>
-                  <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
-                    Summary
-                  </p>
-                  <p className="mt-3 font-['Satoshi'] text-base leading-8 text-black/64">
-                    {project.longDescription}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
-                    Credits
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-3">
-                    {(credits.length ? credits : ["Add collaborators and campaign credits in admin"]).map((item) => (
-                      <span key={item} className="editorial-chip">
-                        {item}
-                      </span>
-                    ))}
+          {hasSupportingMaterial ? (
+            <div className="col-span-12 xl:col-span-7">
+              {eyebrow("Supporting material")}
+              <div className="mt-5 grid gap-6 md:grid-cols-2">
+                {hasPoster ? (
+                  <div className="aspect-[4/5] overflow-hidden bg-[#ddd7ce]">
+                    <div
+                      className="h-full w-full bg-cover bg-center"
+                      style={{ backgroundImage: `url("${project.posterPath}")` }}
+                    />
                   </div>
+                ) : null}
+                <div
+                  className={[
+                    "space-y-6",
+                    hasPoster ? "border-t border-black/8 pt-5 md:border-t-0 md:pt-0" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {hasSummary ? (
+                    <div>
+                      <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
+                        Summary
+                      </p>
+                      <p className="mt-3 font-['Satoshi'] text-base leading-8 text-black/64">
+                        {project.longDescription}
+                      </p>
+                    </div>
+                  ) : null}
+                  {credits.length ? (
+                    <div>
+                      <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
+                        Credits
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-3">
+                        {credits.map((item) => (
+                          <span key={item} className="editorial-chip">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>
-          </div>
+          ) : null}
 
-          <aside className="col-span-12 xl:col-span-5 xl:pl-8">
+          <aside className={`col-span-12 ${hasSupportingMaterial ? "xl:col-span-5 xl:pl-8" : "xl:col-span-12"}`}>
             {eyebrow("Related stories")}
             <div className="mt-5 space-y-4">
               {relatedProjects.length ? (
