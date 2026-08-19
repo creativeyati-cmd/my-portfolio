@@ -152,10 +152,12 @@ canvas {
   justify-content: center;
   border-radius: 9999px;
   border: 1px solid transparent;
-  padding: 0.72rem 0.95rem;
+  padding: 0.7rem 0.95rem;
   font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
-  font-size: 0.67rem;
-  letter-spacing: 0.24em;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
   text-transform: uppercase;
   color: rgb(23 21 18 / 0.58);
   transition:
@@ -223,8 +225,10 @@ canvas {
   }
 
   .nav-link-chip {
-    font-size: 0.64rem;
-    letter-spacing: 0.2em;
+    min-height: 2.45rem;
+    padding: 0.64rem 0.82rem;
+    font-size: 0.69rem;
+    letter-spacing: 0.13em;
   }
 }
 

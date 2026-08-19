@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 
 function buildMonogram(value) {
@@ -21,6 +22,13 @@ function navItemClass({ selected }) {
   ]
     .filter(Boolean)
     .join(" ");
+}
+
+function routeMatches(pathname, href) {
+  if (!pathname) return false;
+  return href === "/"
+    ? pathname === "/"
+    : pathname === href || pathname.startsWith(`${href}/`);
 }
 
 function preferredInquiryLabel(settings) {
@@ -92,6 +100,7 @@ function ContactLine({ label, value, href }) {
 }
 
 export default function GlassNav({ labels, className = "" }) {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const monogram = buildMonogram(labels?.siteTitle);
@@ -122,20 +131,20 @@ export default function GlassNav({ labels, className = "" }) {
   return (
     <>
       <div className={`fixed inset-x-0 top-4 z-40 px-3 sm:top-6 ${className}`.trim()}>
-        <div className="relative mx-auto flex max-w-[72rem] items-center justify-center">
+        <div className="relative mx-auto flex max-w-[72rem] items-center justify-center gap-3">
           <nav
-            className="glass-nav flex w-fit max-w-[calc(100vw-1.5rem)] items-center justify-between gap-2 px-2 py-2 sm:px-3 lg:w-full lg:max-w-[46rem]"
+            className="glass-nav flex w-fit max-w-[calc(100vw-32px)] items-center gap-2 px-2 py-2 sm:px-3"
             aria-label="Primary"
           >
             <Link
               href="/"
               aria-label={labels?.siteTitle || "Portfolio"}
-              className="flex h-11 min-w-11 items-center justify-center rounded-full border border-black/8 bg-white/72 px-3 text-[#171512]/78 transition hover:bg-white"
+              className="flex h-9 min-w-9 items-center justify-center rounded-full border border-black/8 bg-white/58 p-2 text-[#171512]/78 transition hover:bg-white/72 sm:h-10 sm:min-w-10 sm:p-2.5"
               onClick={() => selectLink()}
             >
               {logoSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoSrc} alt={logoAlt} className="h-6 w-auto object-contain" />
+                <img src={logoSrc} alt={logoAlt} className="h-full w-full object-contain p-0.5" />
               ) : (
                 <span className="font-['Geist'] text-[10px] uppercase tracking-[0.22em]">
                   {monogram}
@@ -143,33 +152,21 @@ export default function GlassNav({ labels, className = "" }) {
               )}
             </Link>
 
-            <div className="hidden flex-1 items-center justify-center gap-1 lg:flex">
+            <span aria-hidden="true" className="h-6 w-px shrink-0 bg-black/10 sm:h-7" />
+
+            <div className="flex items-center gap-1 sm:gap-1.5">
               {links.map((link) => {
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={navItemClass({ selected: false })}
+                    className={navItemClass({ selected: routeMatches(pathname, link.href) })}
                     onClick={() => selectLink()}
                   >
                     {link.label}
                   </Link>
                 );
               })}
-            </div>
-
-            <span aria-hidden="true" className="hidden h-11 min-w-11 lg:block" />
-
-            <div className="flex items-center gap-2 lg:hidden">
-              <button
-                type="button"
-                className="nav-link-chip"
-                onClick={() => setMenuOpen((value) => !value)}
-                aria-expanded={menuOpen}
-                aria-controls="mobile-nav-panel"
-              >
-                Menu
-              </button>
             </div>
           </nav>
 
@@ -180,30 +177,28 @@ export default function GlassNav({ labels, className = "" }) {
           >
             {inquiryLabel}
           </button>
+
+          <button
+            type="button"
+            className="glass-nav nav-link-chip h-9 px-3 sm:h-10 sm:px-4 lg:hidden"
+            onClick={() => setMenuOpen((value) => !value)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav-panel"
+          >
+            Menu
+          </button>
         </div>
       </div>
 
       {menuOpen ? (
         <div
           id="mobile-nav-panel"
-          className="glass-sheet fixed left-1/2 top-[5.4rem] z-40 w-[min(18.5rem,calc(100%-1.5rem))] -translate-x-1/2 rounded-[1.75rem] p-3 lg:hidden"
+          className="glass-sheet fixed left-1/2 top-[5.2rem] z-40 w-fit max-w-[calc(100vw-32px)] -translate-x-1/2 rounded-[1.75rem] p-3 lg:hidden"
         >
-          <div className="space-y-1">
-            {links.map((link) => {
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`${navItemClass({ selected: false })} w-full justify-start`}
-                  onClick={() => selectLink()}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
+          <div className="flex flex-col gap-2">
             <button
               type="button"
-              className="nav-link-chip nav-link-chip-selected mt-2 w-full justify-center"
+              className="nav-link-chip nav-link-chip-selected w-full justify-center"
               onClick={() => {
                 setMenuOpen(false);
                 openContact();
@@ -231,18 +226,18 @@ export default function GlassNav({ labels, className = "" }) {
                 <button
                   type="button"
                   onClick={() => setContactOpen(false)}
-                  className="nav-link-chip"
-                >
-                  Close
-                </button>
-              </div>
+                className="nav-link-chip"
+              >
+                Close
+              </button>
+            </div>
 
               <p className="mt-4 max-w-[34rem] font-['Satoshi'] text-base leading-8 text-[#171512]/62">
                 Share the project essentials first. A short form keeps the process clear, quick, and easy to complete from any device.
               </p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-5 sm:p-6">
               {hasEmbeddedInquiry ? (
                 <div className="glass-card overflow-hidden rounded-[1.25rem]">
                   <iframe
@@ -271,7 +266,7 @@ export default function GlassNav({ labels, className = "" }) {
                 </div>
               )}
 
-              <div className="mt-8">
+              <div className="glass-card mt-8 rounded-[1.25rem] px-5 py-4">
                 <ContactLine
                   label={labels?.emailLabel || "Email"}
                   value={labels?.contactEmail}
