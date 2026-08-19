@@ -13,7 +13,9 @@ import { AdminIcon } from "./icons";
 export default function ProjectActionsMenu({ project, redirectTo = "/admin/projects" }) {
   const [open, setOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [direction, setDirection] = useState("down");
   const rootRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     function handlePointer(event) {
@@ -37,6 +39,30 @@ export default function ProjectActionsMenu({ project, redirectTo = "/admin/proje
     };
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+
+    function updateDirection() {
+      const triggerRect = rootRef.current?.getBoundingClientRect();
+      const menuHeight = menuRef.current?.offsetHeight || 232;
+      if (!triggerRect) return;
+
+      const spaceBelow = window.innerHeight - triggerRect.bottom;
+      const spaceAbove = triggerRect.top;
+      const shouldOpenUp = spaceBelow < menuHeight + 16 && spaceAbove > spaceBelow;
+      setDirection(shouldOpenUp ? "up" : "down");
+    }
+
+    updateDirection();
+    window.addEventListener("resize", updateDirection);
+    window.addEventListener("scroll", updateDirection, true);
+
+    return () => {
+      window.removeEventListener("resize", updateDirection);
+      window.removeEventListener("scroll", updateDirection, true);
+    };
+  }, [open]);
+
   const previewHref =
     project.status === "published"
       ? `/projects/${project.slug}`
@@ -55,7 +81,13 @@ export default function ProjectActionsMenu({ project, redirectTo = "/admin/proje
       </button>
 
       {open ? (
-        <div className="admin-dropdown absolute right-0 top-[calc(100%+8px)] z-30 w-52 p-2">
+        <div
+          ref={menuRef}
+          className={[
+            "admin-dropdown absolute right-0 z-30 w-52 p-2",
+            direction === "up" ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]",
+          ].join(" ")}
+        >
           <div className="flex flex-col gap-1">
             <Link
               href={`/admin/projects/${project.id}/edit`}

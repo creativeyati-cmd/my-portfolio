@@ -4,7 +4,7 @@ const SETTINGS_ITEMS = [
   ["general", "General"],
   ["content", "Content"],
   ["contact", "Contact"],
-  ["booking", "Booking"],
+  ["booking", "Inquiries"],
   ["seo", "SEO"],
   ["account", "Account"],
 ];

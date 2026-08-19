@@ -222,7 +222,7 @@ export function Textarea({
 
 export function SettingsForm({ redirectTo, savedState, children, submitLabel }) {
   return (
-    <form action={saveSiteSettingsAction} className="space-y-6">
+    <form action={saveSiteSettingsAction} encType="multipart/form-data" className="space-y-6">
       <input type="hidden" name="redirectTo" value={redirectTo} />
       <input type="hidden" name="savedState" value={savedState} />
       {children}

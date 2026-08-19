@@ -69,9 +69,12 @@ export async function saveSiteSettingsAction(formData) {
   const current = await getSiteSettings();
   const redirectTo = redirectTarget(formData, "/admin/settings/content");
   const savedState = value(formData, "savedState") || "settings-updated";
+  const logoUpload = await saveUpload(formData.get("logoFile"), "images");
 
   await updateSiteSettings({
     siteTitle: mergeSettingField(formData, current, "siteTitle"),
+    logoPath: logoUpload || mergeSettingField(formData, current, "logoPath"),
+    logoAlt: mergeSettingField(formData, current, "logoAlt"),
     siteDescription: mergeSettingField(formData, current, "siteDescription"),
     introHeading: mergeSettingField(formData, current, "introHeading"),
     introSubheading: mergeSettingField(formData, current, "introSubheading"),

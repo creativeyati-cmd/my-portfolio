@@ -23,10 +23,53 @@ function navItemClass({ selected }) {
     .join(" ");
 }
 
+function preferredInquiryLabel(settings) {
+  const raw = String(settings?.bookingCta || settings?.navContactCtaLabel || "").trim();
+  if (!raw) return "Get in touch";
+
+  const normalized = raw.toLowerCase();
+  if (normalized === "contact" || normalized === "book a call") {
+    return "Get in touch";
+  }
+
+  return raw;
+}
+
 function contactHref(settings) {
   if (settings?.contactEmail) return `mailto:${settings.contactEmail}`;
   if (settings?.contactPhone) return `tel:${settings.contactPhone}`;
   return "/contact";
+}
+
+function inquiryFormUrl(settings) {
+  return String(settings?.bookingUrl || "").trim();
+}
+
+function inquiryFormEmbedUrl(settings) {
+  const raw = inquiryFormUrl(settings);
+  if (!raw) return "";
+  if (/forms\.gle\//i.test(raw)) return "";
+
+  try {
+    const url = new URL(raw);
+
+    if (!/docs\.google\.com$/i.test(url.hostname)) {
+      return raw;
+    }
+
+    if (url.pathname.includes("/formResponse")) {
+      url.pathname = url.pathname.replace("/formResponse", "/viewform");
+    }
+
+    if (url.pathname.includes("/viewform")) {
+      url.searchParams.set("embedded", "true");
+      return url.toString();
+    }
+
+    return raw;
+  } catch {
+    return "";
+  }
 }
 
 function ContactLine({ label, value, href }) {
@@ -61,6 +104,10 @@ export default function GlassNav({ labels, className = "" }) {
   );
   const logoSrc = labels?.logoPath || labels?.siteLogo || labels?.brandLogoPath || "";
   const logoAlt = labels?.logoAlt || labels?.siteTitle || "Portfolio";
+  const inquiryLabel = preferredInquiryLabel(labels);
+  const inquiryUrl = inquiryFormUrl(labels);
+  const inquiryEmbed = inquiryFormEmbedUrl(labels);
+  const hasEmbeddedInquiry = Boolean(inquiryEmbed);
 
   function selectLink() {
     setMenuOpen(false);
@@ -74,59 +121,74 @@ export default function GlassNav({ labels, className = "" }) {
 
   return (
     <>
-      <nav
-        className={`glass-nav fixed left-1/2 top-4 z-40 flex w-[calc(100%-1.5rem)] max-w-[min(46rem,calc(100%-1.5rem))] -translate-x-1/2 items-center justify-between gap-2 px-2 py-2 sm:top-6 sm:px-3 ${className}`.trim()}
-        aria-label="Primary"
-      >
-        <Link
-          href="/"
-          aria-label={labels?.siteTitle || "Portfolio"}
-          className="flex h-11 min-w-11 items-center justify-center rounded-full border border-black/8 bg-white/72 px-3 text-[#171512]/78 transition hover:bg-white"
-          onClick={() => selectLink()}
-        >
-          {logoSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoSrc} alt={logoAlt} className="h-6 w-auto object-contain" />
-          ) : (
-            <span className="font-['Geist'] text-[10px] uppercase tracking-[0.22em]">
-              {monogram}
-            </span>
-          )}
-        </Link>
+      <div className={`fixed inset-x-0 top-4 z-40 px-3 sm:top-6 ${className}`.trim()}>
+        <div className="relative mx-auto flex max-w-[72rem] items-center justify-center">
+          <nav
+            className="glass-nav flex w-full max-w-[46rem] items-center justify-between gap-2 px-2 py-2 sm:px-3"
+            aria-label="Primary"
+          >
+            <Link
+              href="/"
+              aria-label={labels?.siteTitle || "Portfolio"}
+              className="flex h-11 min-w-11 items-center justify-center rounded-full border border-black/8 bg-white/72 px-3 text-[#171512]/78 transition hover:bg-white"
+              onClick={() => selectLink()}
+            >
+              {logoSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoSrc} alt={logoAlt} className="h-6 w-auto object-contain" />
+              ) : (
+                <span className="font-['Geist'] text-[10px] uppercase tracking-[0.22em]">
+                  {monogram}
+                </span>
+              )}
+            </Link>
 
-        <div className="hidden items-center gap-1 lg:flex">
-          {links.map((link) => {
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={navItemClass({ selected: false })}
-                onClick={() => selectLink()}
+            <div className="hidden flex-1 items-center justify-center gap-1 lg:flex">
+              {links.map((link) => {
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={navItemClass({ selected: false })}
+                    onClick={() => selectLink()}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <span aria-hidden="true" className="hidden h-11 min-w-11 lg:block" />
+
+            <div className="flex items-center gap-2 lg:hidden">
+              <button
+                type="button"
+                className="nav-link-chip nav-link-chip-selected"
+                onClick={openContact}
               >
-                {link.label}
-              </Link>
-            );
-          })}
+                {inquiryLabel}
+              </button>
+              <button
+                type="button"
+                className="nav-link-chip"
+                onClick={() => setMenuOpen((value) => !value)}
+                aria-expanded={menuOpen}
+                aria-controls="mobile-nav-panel"
+              >
+                Menu
+              </button>
+            </div>
+          </nav>
 
           <button
             type="button"
-            className="nav-link-chip nav-link-chip-selected"
+            className="nav-link-chip nav-link-chip-selected absolute right-0 top-1/2 hidden h-11 -translate-y-1/2 px-5 lg:inline-flex"
             onClick={openContact}
           >
-            {labels?.navContactCtaLabel || labels?.navContactLabel || "Contact"}
+            {inquiryLabel}
           </button>
         </div>
-
-        <button
-          type="button"
-          className="nav-link-chip lg:hidden"
-          onClick={() => setMenuOpen((value) => !value)}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-nav-panel"
-        >
-          Menu
-        </button>
-      </nav>
+      </div>
 
       {menuOpen ? (
         <div
@@ -146,70 +208,103 @@ export default function GlassNav({ labels, className = "" }) {
                 </Link>
               );
             })}
-            <button
-              type="button"
-              className={`${navItemClass({ selected: false })} w-full justify-start`}
-              onClick={() => {
-                setMenuOpen(false);
-                openContact();
-              }}
-            >
-              {labels?.navContactLabel || labels?.navContactCtaLabel || "Contact"}
-            </button>
           </div>
         </div>
       ) : null}
 
       {contactOpen ? (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-[rgba(18,17,15,0.16)] px-4 py-24 backdrop-blur-sm">
-          <div className="w-full max-w-[32rem] rounded-[1.75rem] border border-black/8 bg-[#f8f5ef] p-6 shadow-[0_28px_90px_rgba(0,0,0,0.12)]">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.24em] text-black/38">
-                  {labels?.contactHeading || "Contact"}
-                </p>
-                <h2 className="mt-3 font-['PP_Neue_Montreal'] text-[2.45rem] leading-[0.95] tracking-[-0.06em] text-[#171512]">
-                  {labels?.contactPageTitle || "Let&apos;s talk."}
-                </h2>
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-[rgba(18,17,15,0.16)] px-4 py-20 backdrop-blur-sm sm:py-24">
+          <div className="flex max-h-[calc(100vh-5rem)] w-full max-w-[42rem] flex-col overflow-hidden rounded-[1.75rem] border border-black/8 bg-[#f8f5ef] shadow-[0_28px_90px_rgba(0,0,0,0.12)]">
+            <div className="border-b border-black/8 p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-black/38">
+                    Project inquiry
+                  </p>
+                  <h2 className="mt-3 font-['PP_Neue_Montreal'] text-[2.45rem] leading-[0.95] tracking-[-0.06em] text-[#171512]">
+                    Start the conversation.
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setContactOpen(false)}
+                  className="nav-link-chip"
+                >
+                  Close
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setContactOpen(false)}
-                className="nav-link-chip"
-              >
-                Close
-              </button>
+
+              <p className="mt-4 max-w-[34rem] font-['Satoshi'] text-base leading-8 text-[#171512]/62">
+                Share the project essentials first. A short form keeps the process clear, quick, and easy to complete from any device.
+              </p>
             </div>
 
-            <p className="mt-4 max-w-[30rem] font-['Satoshi'] text-base leading-8 text-[#171512]/62">
-              {labels?.contactPageLead ||
-                "Reach out for commercial projects, launches, and story-led creative collaborations."}
-            </p>
+            <div className="flex-1 overflow-y-auto p-6">
+              {hasEmbeddedInquiry ? (
+                <div className="overflow-hidden rounded-[1.25rem] border border-black/8 bg-white">
+                  <iframe
+                    src={inquiryEmbed}
+                    title="Project inquiry form"
+                    className="h-[min(62vh,42rem)] w-full"
+                  />
+                </div>
+              ) : inquiryUrl ? (
+                <div className="rounded-[1.25rem] border border-black/8 bg-white px-5 py-5">
+                  <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
+                    Inquiry form
+                  </p>
+                  <p className="mt-3 font-['Satoshi'] text-base leading-8 text-[#171512]/64">
+                    The Google Form opens in a new tab so the full inquiry can be completed without compressing the questions into a cramped modal.
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-[1.25rem] border border-black/8 bg-white px-5 py-5">
+                  <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
+                    Inquiry form not added yet
+                  </p>
+                  <p className="mt-3 font-['Satoshi'] text-base leading-8 text-[#171512]/64">
+                    Add a Google Form URL in admin under Settings and Inquiries to turn this CTA into a full lead capture flow.
+                  </p>
+                </div>
+              )}
 
-            <div className="mt-8">
-              <ContactLine
-                label={labels?.emailLabel || "Email"}
-                value={labels?.contactEmail}
-                href={labels?.contactEmail ? `mailto:${labels.contactEmail}` : ""}
-              />
-              <ContactLine
-                label={labels?.phoneLabel || "Phone"}
-                value={labels?.contactPhone}
-                href={labels?.contactPhone ? `tel:${labels.contactPhone}` : ""}
-              />
-              <ContactLine
-                label={labels?.locationLabel || "Location"}
-                value={labels?.location}
-              />
+              <div className="mt-8">
+                <ContactLine
+                  label={labels?.emailLabel || "Email"}
+                  value={labels?.contactEmail}
+                  href={labels?.contactEmail ? `mailto:${labels.contactEmail}` : ""}
+                />
+                <ContactLine
+                  label={labels?.phoneLabel || "Phone"}
+                  value={labels?.contactPhone}
+                  href={labels?.contactPhone ? `tel:${labels.contactPhone}` : ""}
+                />
+                <ContactLine
+                  label={labels?.locationLabel || "Location"}
+                  value={labels?.location}
+                />
+              </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href={contactHref(labels)} className="nav-link-chip nav-link-chip-selected">
-                {labels?.navContactCtaLabel || "Get in touch"}
-              </a>
-              <Link href="/contact" className="nav-link-chip" onClick={() => setContactOpen(false)}>
-                Open contact page
-              </Link>
+            <div className="border-t border-black/8 p-6">
+              <div className="flex flex-wrap gap-3">
+                {inquiryUrl ? (
+                  <a
+                    href={inquiryUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="nav-link-chip nav-link-chip-selected"
+                  >
+                    Open full form
+                  </a>
+                ) : null}
+                <a href={contactHref(labels)} className="nav-link-chip">
+                  {labels?.contactEmail ? "Email directly" : "Open contact details"}
+                </a>
+                <Link href="/contact" className="nav-link-chip" onClick={() => setContactOpen(false)}>
+                  Contact page
+                </Link>
+              </div>
             </div>
           </div>
         </div>

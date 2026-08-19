@@ -5,7 +5,6 @@ import { getAdminAccount, getSiteSettings } from "@/lib/db";
 
 import {
   AccountForm,
-  CheckboxField,
   Field,
   PageHeader,
   SettingsForm,
@@ -38,6 +37,8 @@ function GeneralSection({ settings }) {
     >
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Portfolio name" name="siteTitle" defaultValue={settings.siteTitle} />
+        <Field label="Logo image path" name="logoPath" defaultValue={settings.logoPath || ""} />
+        <Field label="Logo alt text" name="logoAlt" defaultValue={settings.logoAlt || ""} />
         <Field label="Portfolio URL" name="portfolioUrl" defaultValue={settings.portfolioUrl} />
         <Field label="Tagline" name="aboutPageLead" defaultValue={settings.aboutPageLead} />
         <Field
@@ -46,7 +47,35 @@ function GeneralSection({ settings }) {
           defaultValue={settings.defaultLanguage}
         />
         <Field label="Timezone" name="timezone" defaultValue={settings.timezone} />
+        <label className="block md:col-span-2">
+          <span className="mb-2 block text-sm font-medium text-[#202938]">Upload logo image</span>
+          <input
+            type="file"
+            name="logoFile"
+            accept="image/*"
+            className="admin-input border-dashed"
+          />
+          <span className="mt-2 block text-xs text-black/45">
+            Upload a small brand mark to replace the letter monogram in the public nav.
+          </span>
+        </label>
       </div>
+      {settings.logoPath ? (
+        <div className="admin-panel-muted mt-4 flex items-center gap-4 px-4 py-4">
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-black/8 bg-white">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={settings.logoPath}
+              alt={settings.logoAlt || settings.siteTitle || "Logo preview"}
+              className="h-full w-full object-contain"
+            />
+          </div>
+          <div className="text-sm leading-6 text-black/56">
+            <p className="font-medium text-[#202938]">Current nav logo</p>
+            <p>The uploaded logo will appear in place of the initials on the frontend.</p>
+          </div>
+        </div>
+      ) : null}
     </SettingsForm>
   );
 }
@@ -120,6 +149,11 @@ function ContactSection({ settings }) {
 }
 
 function BookingSection({ settings }) {
+  const inquiryCtaLabel =
+    settings.bookingCta && settings.bookingCta !== "Book a call"
+      ? settings.bookingCta
+      : "Get in touch";
+
   return (
     <SettingsForm
       redirectTo="/admin/settings/booking"
@@ -127,14 +161,22 @@ function BookingSection({ settings }) {
       submitLabel="Save changes"
     >
       <div className="space-y-4">
-        <CheckboxField
-          label="Enable booking"
-          name="bookingEnabled"
-          defaultChecked={settings.bookingEnabled}
-        />
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Booking CTA" name="bookingCta" defaultValue={settings.bookingCta} />
-          <Field label="Booking URL" name="bookingUrl" defaultValue={settings.bookingUrl} />
+          <Field
+            label="CTA label"
+            name="bookingCta"
+            defaultValue={inquiryCtaLabel}
+            hint="Used for the standalone nav button."
+          />
+          <Field
+            label="Google Form URL"
+            name="bookingUrl"
+            defaultValue={settings.bookingUrl}
+            hint="Paste the public Google Form share URL. If it is a standard Google Forms link, it will embed inside the nav CTA modal automatically."
+          />
+        </div>
+        <div className="rounded-[16px] border border-black/8 bg-[#fbfaf7] px-4 py-4 text-sm leading-6 text-black/56">
+          Keep the form short and focused. Ask only for the project essentials so people can complete it quickly on mobile and desktop.
         </div>
       </div>
     </SettingsForm>

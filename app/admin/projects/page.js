@@ -88,8 +88,8 @@ export default async function AdminProjectsPage({ searchParams }) {
       {filtered.length ? (
         <section className="space-y-4">
           <SectionHeader title={`${filtered.length} project${filtered.length === 1 ? "" : "s"}`} />
-          <div className="admin-panel overflow-hidden bg-white">
-            <div className="overflow-x-auto px-5 py-4">
+          <div className="admin-panel overflow-visible bg-white">
+            <div className="overflow-x-auto overflow-y-visible px-5 py-4">
               <table className="admin-table min-w-[860px]">
                 <thead>
                   <tr>
