@@ -42,7 +42,7 @@ const blankTexture = () => {
   return t;
 };
 
-export default function Carousel({ projects, siteSettings, serviceCategories = [] }) {
+export default function Carousel({ projects, siteSettings }) {
   const portfolioProjects = projects?.length ? projects : DEFAULT_PROJECTS;
   const settings = {
     ...DEFAULT_SITE_SETTINGS,
@@ -1353,7 +1353,7 @@ export default function Carousel({ projects, siteSettings, serviceCategories = [
           is the carousel. */}
       <div ref={containerRef} className="fixed inset-0 touch-none" />
 
-      <GlassNav currentPath="/" labels={settings} serviceCategories={serviceCategories} />
+      <GlassNav currentPath="/" labels={settings} />
 
       {currentProject ? (
         <div className="fixed bottom-4 left-4 right-4 z-20 border border-black/10 bg-[#f7f4ee]/88 p-4 text-[#0a0a0a] backdrop-blur sm:bottom-[3.5vh] sm:left-auto sm:right-[5vw] sm:max-w-[22rem] sm:p-5">

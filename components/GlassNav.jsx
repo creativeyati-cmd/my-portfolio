@@ -72,7 +72,6 @@ export default function GlassNav({ currentPath = "/", labels, className = "" }) 
   const monogram = buildMonogram(labels?.siteTitle);
   const links = useMemo(
     () => [
-      { href: "/", label: labels?.navHomeLabel || "Home" },
       { href: "/projects", label: labels?.navProjectsLabel || "Projects" },
       { href: "/about", label: labels?.navAboutLabel || "About" },
     ],
@@ -142,13 +141,10 @@ export default function GlassNav({ currentPath = "/", labels, className = "" }) 
 
           <button
             type="button"
-            className={navItemClass({
-              current: routeMatches(currentPath, "/contact"),
-              selected: selectedHref === "/contact" && contactOpen,
-            })}
+            className="nav-link-chip nav-link-chip-selected"
             onClick={openContact}
           >
-            {labels?.navContactLabel || labels?.navContactCtaLabel || "Contact"}
+            {labels?.navContactCtaLabel || labels?.navContactLabel || "Contact"}
           </button>
         </div>
 
