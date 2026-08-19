@@ -41,8 +41,8 @@
 }
 
 :root {
-  --page-ivory: #f7f4ee;
-  --page-ink: #12110f;
+  --page-ivory: #f5f2ec;
+  --page-ink: #171512;
   --page-accent: #9b6a38;
   --admin-bg: #f5f5f2;
   --admin-surface: rgba(255, 255, 255, 0.92);
@@ -73,13 +73,20 @@ canvas {
 }
 
 .editorial-shell {
-  width: min(1600px, 100%);
+  width: min(1440px, 100%);
   margin-inline: auto;
-  padding-inline: clamp(1.5rem, 8vw, 8rem);
+  padding-inline: clamp(1.5rem, 5vw, 4.5rem);
 }
 
 .editorial-hero {
-  padding-top: clamp(7rem, 12vw, 9rem);
+  padding-top: clamp(7rem, 10vw, 8.5rem);
+}
+
+.editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: clamp(1.25rem, 2vw, 2rem);
+  row-gap: clamp(2rem, 4vw, 4.5rem);
 }
 
 .editorial-accent-square {
@@ -91,41 +98,95 @@ canvas {
 }
 
 .editorial-brand-name {
-  max-width: min(100%, 9ch);
+  max-width: min(100%, 10ch);
   font-family: "PP Neue Montreal", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(6rem, 9vw, 8.75rem);
-  line-height: 0.94;
-  letter-spacing: -0.03em;
+  font-size: clamp(4.7rem, 8vw, 8.1rem);
+  line-height: 0.96;
+  letter-spacing: -0.028em;
   color: var(--page-ink);
 }
 
 .editorial-role-title {
   max-width: min(100%, 12ch);
   font-family: "PP Neue Montreal", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(3.5rem, 5.2vw, 4.75rem);
-  line-height: 1.01;
-  letter-spacing: -0.028em;
+  font-size: clamp(2.8rem, 4.7vw, 4.65rem);
+  line-height: 1.03;
+  letter-spacing: -0.024em;
   color: var(--page-ink);
 }
 
 .editorial-page-title {
-  max-width: min(100%, 11ch);
+  max-width: min(100%, 12ch);
   font-family: "PP Neue Montreal", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(4rem, 7vw, 7rem);
-  line-height: 0.96;
-  letter-spacing: -0.03em;
+  font-size: clamp(3.35rem, 6vw, 6.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.028em;
   color: var(--page-ink);
 }
 
 .editorial-support-copy {
   max-width: 26rem;
   font-family: "Satoshi", ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(0.98rem, 1.15vw, 1.05rem);
-  line-height: 1.9;
+  font-size: clamp(1rem, 1.15vw, 1.08rem);
+  line-height: 1.95;
   color: rgb(18 17 15 / 0.62);
 }
 
+.editorial-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.35rem;
+  border: 1px solid rgb(23 21 18 / 0.1);
+  border-radius: 9999px;
+  padding: 0.45rem 0.9rem;
+  font-family: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.94rem;
+  color: rgb(23 21 18 / 0.72);
+  background: rgb(255 255 255 / 0.58);
+}
+
+.nav-link-chip {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  padding: 0.72rem 0.95rem;
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.67rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgb(23 21 18 / 0.58);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.nav-link-chip:hover {
+  background: rgb(255 255 255 / 0.62);
+  color: rgb(23 21 18 / 0.82);
+}
+
+.nav-link-chip-current {
+  color: rgb(23 21 18 / 0.82);
+  box-shadow: inset 0 -1px 0 rgb(23 21 18 / 0.28);
+}
+
+.nav-link-chip-selected {
+  border-color: rgb(23 21 18 / 0.08);
+  background: rgb(17 17 17);
+  color: white;
+  box-shadow: 0 14px 34px rgb(0 0 0 / 0.12);
+}
+
 @media (max-width: 1024px) {
+  .editorial-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
   .editorial-brand-name,
   .editorial-page-title {
     max-width: 100%;
@@ -137,19 +198,33 @@ canvas {
     padding-top: calc(72px + 3rem);
   }
 
+  .editorial-grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2.75rem;
+  }
+
   .editorial-brand-name {
-    font-size: clamp(4.2rem, 16vw, 5.75rem);
-    line-height: 0.95;
+    font-size: clamp(3.65rem, 14vw, 5rem);
+    line-height: 0.97;
   }
 
   .editorial-role-title {
-    font-size: clamp(2.75rem, 11vw, 4rem);
-    line-height: 1.03;
+    font-size: clamp(2.3rem, 10vw, 3.4rem);
+    line-height: 1.06;
   }
 
   .editorial-page-title {
-    font-size: clamp(3.1rem, 13vw, 4.8rem);
-    line-height: 0.98;
+    font-size: clamp(2.8rem, 12vw, 4.25rem);
+    line-height: 1;
+  }
+
+  .editorial-chip {
+    font-size: 0.9rem;
+  }
+
+  .nav-link-chip {
+    font-size: 0.64rem;
+    letter-spacing: 0.2em;
   }
 }
 

@@ -2,20 +2,13 @@ import Link from "next/link";
 
 import GlassNav from "@/components/GlassNav";
 import { getSiteSettings, listCategories } from "@/lib/db";
-import { buildRoleLines } from "@/lib/editorial";
+import { buildRoleLines, splitList } from "@/lib/editorial";
 
 export const dynamic = "force-dynamic";
 
-function splitLines(value) {
-  return String(value || "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function eyebrow(label) {
   return (
-    <p className="text-[10px] uppercase tracking-[0.28em] text-black/42 sm:text-[11px]">
+    <p className="text-[10px] uppercase tracking-[0.28em] text-black/40 sm:text-[11px]">
       {label}
     </p>
   );
@@ -24,10 +17,10 @@ function eyebrow(label) {
 function PulseStat({ value, label }) {
   return (
     <div className="border-t border-black/10 pt-4">
-      <p className="font-['PP_Neue_Montreal'] text-[3.2rem] leading-none tracking-[-0.08em] text-[#12110f] sm:text-[4.5rem]">
+      <p className="font-['PP_Neue_Montreal'] text-[3.15rem] leading-none tracking-[-0.08em] text-[#171512] sm:text-[4.3rem]">
         {value}
       </p>
-      <p className="mt-2 font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/42">
+      <p className="mt-2 font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
         {label}
       </p>
     </div>
@@ -39,75 +32,69 @@ export default async function AboutPage() {
     getSiteSettings(),
     listCategories({ includeServices: true }),
   ]);
-  const skills = splitLines(settings.skillsList);
-  const openTo = splitLines(settings.openToList);
+  const skills = splitList(settings.skillsList);
+  const openTo = splitList(settings.openToList);
   const roleLines = buildRoleLines(settings.aboutBody || settings.introSubheading || "");
-  const services = serviceCategories.flatMap((category) => category.services || []);
   const activeCategories = serviceCategories.filter((category) => category.status === "active");
+  const services = activeCategories.flatMap((category) => category.services || []);
 
   return (
-    <main className="min-h-screen bg-[#f7f4ee] py-24 text-[#141311]">
-      <GlassNav
-        currentPath="/about"
-        labels={settings}
-        serviceCategories={activeCategories}
-      />
+    <main className="min-h-screen bg-[#f5f2ec] pb-20 pt-24 text-[#171512] sm:pb-24">
+      <GlassNav currentPath="/about" labels={settings} />
 
       <div className="editorial-shell editorial-hero">
-        <section className="grid gap-12 xl:grid-cols-[minmax(0,0.92fr)_minmax(260px,0.4fr)] xl:items-start">
-          <div>
-            {eyebrow(settings.aboutTitle)}
+        <section className="editorial-grid items-start gap-y-12">
+          <div className="col-span-12 xl:col-span-7">
+            {eyebrow(settings.aboutTitle || "Profile")}
             <h1 className="mt-5 editorial-brand-name">{settings.aboutPageTitle}</h1>
-            <div className="mt-[clamp(2.5rem,4vw,3.5rem)] editorial-role-title">
+            <div className="mt-8 editorial-role-title max-w-[12ch]">
               {roleLines.map((line) => (
                 <span key={line} className="block">
                   {line}
                 </span>
               ))}
             </div>
-            <p className="mt-10 editorial-support-copy max-w-[28rem]">
+            <p className="mt-8 max-w-[35rem] font-['Satoshi'] text-[1.05rem] leading-8 text-black/64 sm:text-[1.08rem]">
               {settings.aboutPageLead}
             </p>
-
-            <div className="mt-10 flex flex-wrap gap-3">
-              {settings.location ? (
-                <div className="rounded-full border border-black/10 px-4 py-2 font-['Satoshi'] text-sm text-black/70">
-                  {settings.locationLabel}: {settings.location}
-                </div>
-              ) : null}
+            <div className="mt-8 flex flex-wrap gap-3">
               {settings.profileAvailability ? (
-                <div className="rounded-full border border-black/10 px-4 py-2 font-['Satoshi'] text-sm text-black/70">
+                <span className="editorial-chip">
                   {settings.availabilityLabel}: {settings.profileAvailability}
-                </div>
+                </span>
+              ) : null}
+              {settings.location ? (
+                <span className="editorial-chip">
+                  {settings.locationLabel}: {settings.location}
+                </span>
               ) : null}
             </div>
           </div>
 
-          <div className="self-start pt-2 xl:pt-3">
+          <div className="col-span-12 xl:col-span-5 xl:pl-8">
             <div className="mb-6 flex justify-start xl:justify-end">
               <span aria-hidden="true" className="editorial-accent-square" />
             </div>
             {eyebrow("Profile pulse")}
-            <div className="mt-6 space-y-6">
-              <PulseStat value={String(activeCategories.length).padStart(2, "0")} label="Categories" />
-              <PulseStat value={String(services.length).padStart(2, "0")} label="Services" />
-              <PulseStat value={String(skills.length).padStart(2, "0")} label="Practice areas" />
-              <PulseStat value={String(openTo.length).padStart(2, "0")} label="Open collaborations" />
+            <div className="mt-6 space-y-5">
+              <PulseStat value={String(activeCategories.length).padStart(2, "0")} label="Service categories" />
+              <PulseStat value={String(services.length).padStart(2, "0")} label="Capabilities" />
+              <PulseStat value={String(skills.length).padStart(2, "0")} label="Skill tags" />
+              <PulseStat value={String(openTo.length).padStart(2, "0")} label="Open to" />
             </div>
           </div>
         </section>
 
-        <section className="mt-18 grid gap-8 xl:grid-cols-[minmax(0,0.8fr)_minmax(320px,0.6fr)]">
-          <div className="border-t border-black/10 pt-5">
-            {eyebrow(settings.aboutNotesTitle)}
-            <p className="mt-6 max-w-[46rem] font-['Satoshi'] text-base leading-9 text-black/64 sm:text-[18px]">
+        <section className="mt-18 editorial-grid gap-y-10 border-t border-black/10 pt-8">
+          <div className="col-span-12 xl:col-span-7">
+            {eyebrow(settings.aboutNotesTitle || "Perspective")}
+            <p className="mt-5 max-w-[44rem] font-['Satoshi'] text-[1.02rem] leading-9 text-black/66 sm:text-[1.12rem]">
               {settings.aboutNotesBody}
             </p>
           </div>
-
-          <aside className="border-t border-black/10 pt-5">
-            {eyebrow(settings.contactHeading)}
-            <div className="mt-6 space-y-3 font-['Satoshi'] text-sm leading-7 text-black/66">
+          <aside className="col-span-12 xl:col-span-5 xl:pl-8">
+            {eyebrow(settings.contactHeading || "Contact")}
+            <div className="mt-5 space-y-3 font-['Satoshi'] text-base leading-8 text-black/66">
               <p>{settings.contactEmail}</p>
               {settings.contactPhone ? <p>{settings.contactPhone}</p> : null}
               {settings.location ? <p>{settings.location}</p> : null}
@@ -115,7 +102,7 @@ export default async function AboutPage() {
             <div className="mt-6">
               <Link
                 href="/contact"
-                className="inline-flex items-center border-b border-black/55 pb-1 font-['Satoshi'] text-sm uppercase tracking-[0.18em] text-black/82"
+                className="inline-flex border-b border-black/55 pb-1 font-['Satoshi'] text-[11px] uppercase tracking-[0.2em] text-black/78"
               >
                 Continue to contact
               </Link>
@@ -124,12 +111,12 @@ export default async function AboutPage() {
         </section>
       </div>
 
-      <section className="relative left-1/2 mt-24 w-screen -translate-x-1/2 overflow-hidden bg-[#131210] py-18 text-[#f6f2ea]">
+      <section className="relative left-1/2 mt-22 w-screen -translate-x-1/2 overflow-hidden bg-[#131210] py-16 text-[#f5f2ec] sm:py-18">
         <div className="editorial-shell">
           {eyebrow("Intermission")}
           <div className="mt-5 overflow-hidden">
-            <div className="editorial-marquee whitespace-nowrap font-['PP_Neue_Montreal'] text-[3.1rem] leading-none tracking-[-0.09em] sm:text-[4.8rem] lg:text-[6.6rem]">
-              Story first. Story first. Story first. Story first.
+            <div className="editorial-marquee whitespace-nowrap font-['PP_Neue_Montreal'] text-[2.8rem] leading-none tracking-[-0.08em] sm:text-[4.2rem] lg:text-[5.8rem]">
+              {`Story-led creative direction. Story-led creative direction. Story-led creative direction.`}
             </div>
           </div>
         </div>
@@ -137,123 +124,105 @@ export default async function AboutPage() {
 
       <div className="editorial-shell">
         <section className="mt-16 sm:mt-20" id="services">
-          {eyebrow(settings.servicesTitle)}
-          <div className="mt-6 space-y-12">
+          {eyebrow(settings.servicesTitle || "Capabilities")}
+          <div className="mt-6 space-y-14">
             {activeCategories.map((category, categoryIndex) => (
-              <section key={category.id} id={`category-${category.slug}`} className="border-t border-black/10 pt-8">
-                <div className="grid gap-6 xl:grid-cols-[120px_minmax(0,0.7fr)_minmax(280px,0.45fr)]">
-                  <div className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
-                    {String(categoryIndex + 1).padStart(2, "0")}
-                  </div>
-                  <div>
-                    <h2 className="font-['PP_Neue_Montreal'] text-[2.6rem] leading-[0.92] tracking-[-0.085em] text-[#12110f] sm:text-[3.9rem]">
+              <section key={category.id} className="border-t border-black/10 pt-8">
+                <div className="editorial-grid gap-y-8">
+                  <div className="col-span-12 xl:col-span-4">
+                    <span className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
+                      {String(categoryIndex + 1).padStart(2, "0")}
+                    </span>
+                    <h2 className="mt-4 font-['PP_Neue_Montreal'] text-[clamp(2.8rem,4.8vw,4.5rem)] leading-[0.95] tracking-[-0.06em] text-[#171512]">
                       {category.name}
                     </h2>
                     {category.description ? (
-                      <p className="mt-4 max-w-[38rem] font-['Satoshi'] text-sm leading-7 text-black/62 sm:text-[15px] sm:leading-8">
+                      <p className="mt-4 max-w-[28rem] font-['Satoshi'] text-base leading-8 text-black/62">
                         {category.description}
                       </p>
                     ) : null}
                   </div>
-                  <div className="space-y-4 border-t border-black/8 pt-4 xl:border-t-0 xl:pt-0">
-                    <div>
-                      <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/42">
-                        Category pulse
-                      </p>
-                      <p className="mt-2 font-['Satoshi'] text-sm leading-7 text-black/62">
-                        {category.services.length} services available
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {category.services.map((service) => (
-                        <Link
+
+                  <div className="col-span-12 xl:col-span-8">
+                    <div className="space-y-0">
+                      {category.services.map((service, serviceIndex) => (
+                        <details
                           key={service.id}
-                          href={`#service-${service.slug}`}
-                          className="rounded-full border border-black/10 px-3 py-2 font-['Satoshi'] text-xs text-black/72"
+                          className="group border-t border-black/8 py-6 first:border-t-0"
+                          id={`service-${service.slug}`}
                         >
-                          {service.name}
-                        </Link>
+                          <summary className="grid cursor-pointer list-none gap-4 md:grid-cols-[72px_minmax(0,1fr)_minmax(220px,0.72fr)]">
+                            <span className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
+                              {String(serviceIndex + 1).padStart(2, "0")}
+                            </span>
+                            <div>
+                              <h3 className="font-['PP_Neue_Montreal'] text-[2rem] leading-[0.95] tracking-[-0.06em] text-[#171512] sm:text-[2.55rem]">
+                                {service.name}
+                              </h3>
+                              <p className="mt-3 font-['Satoshi'] text-base leading-8 text-black/62">
+                                {service.description}
+                              </p>
+                            </div>
+                            <div className="flex items-start justify-between gap-4">
+                              <span className="font-['Satoshi'] text-sm uppercase tracking-[0.18em] text-black/46">
+                                Expand
+                              </span>
+                              <span className="text-black/42 transition group-open:rotate-45">+</span>
+                            </div>
+                          </summary>
+
+                          <div className="mt-5 grid gap-6 border-t border-black/8 pt-5 md:grid-cols-2">
+                            <div>
+                              <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
+                                {settings.serviceIdealForLabel}
+                              </p>
+                              <p className="mt-2 font-['Satoshi'] text-base leading-8 text-black/62">
+                                {service.idealFor}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/40">
+                                {settings.serviceDeliverablesLabel}
+                              </p>
+                              <p className="mt-2 font-['Satoshi'] text-base leading-8 text-black/62">
+                                {service.deliverables}
+                              </p>
+                            </div>
+                          </div>
+                        </details>
                       ))}
                     </div>
                   </div>
-                </div>
-
-                <div className="mt-8 space-y-0">
-                  {category.services.map((service, serviceIndex) => (
-                    <article
-                      key={service.id}
-                      id={`service-${service.slug}`}
-                      className="grid gap-6 border-t border-black/8 py-8 md:grid-cols-[90px_minmax(0,0.8fr)_minmax(260px,0.5fr)]"
-                    >
-                      <div className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/38">
-                        {String(serviceIndex + 1).padStart(2, "0")}
-                      </div>
-                      <div>
-                        <h3 className="font-['PP_Neue_Montreal'] text-[2.2rem] leading-[0.94] tracking-[-0.085em] text-[#12110f] sm:text-[3rem]">
-                          {service.name}
-                        </h3>
-                        <p className="mt-4 max-w-[34rem] font-['Satoshi'] text-sm leading-7 text-black/62 sm:text-[15px] sm:leading-8">
-                          {service.description}
-                        </p>
-                      </div>
-                      <div className="space-y-5">
-                        <div>
-                          <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/42">
-                            {settings.serviceIdealForLabel}
-                          </p>
-                          <p className="mt-2 font-['Satoshi'] text-sm leading-7 text-black/62">
-                            {service.idealFor}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="font-['Geist'] text-[10px] uppercase tracking-[0.24em] text-black/42">
-                            {settings.serviceDeliverablesLabel}
-                          </p>
-                          <p className="mt-2 font-['Satoshi'] text-sm leading-7 text-black/62">
-                            {service.deliverables}
-                          </p>
-                        </div>
-                        {service.cta ? (
-                          <p className="font-['Satoshi'] text-[11px] uppercase tracking-[0.22em] text-black/78">
-                            {service.cta}
-                          </p>
-                        ) : null}
-                      </div>
-                    </article>
-                  ))}
                 </div>
               </section>
             ))}
           </div>
         </section>
 
-        <section className="mt-16 grid gap-10 border-t border-black/10 pt-8 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
-          <div>
+        <section className="mt-16 editorial-grid gap-y-10 border-t border-black/10 pt-8 sm:mt-20">
+          <div className="col-span-12 xl:col-span-6">
             {eyebrow(settings.skillsTitle)}
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-wrap gap-3">
               {skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="rounded-full border border-black/10 px-4 py-2 font-['Satoshi'] text-sm text-black/72"
-                >
+                <span key={skill} className="editorial-chip">
                   {skill}
                 </span>
               ))}
             </div>
           </div>
 
-          <div>
+          <div className="col-span-12 xl:col-span-6 xl:pl-8">
             {eyebrow(settings.openToTitle)}
-            <div className="mt-6 space-y-3">
+            <div className="mt-5 space-y-3">
               {openTo.map((item, index) => (
                 <div
                   key={item}
-                  className="flex items-baseline justify-between gap-4 border-b border-black/6 pb-3"
+                  className="flex items-baseline gap-4 border-b border-black/6 pb-3"
                 >
                   <span className="font-['Geist'] text-[10px] uppercase tracking-[0.22em] text-black/38">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  <span className="flex-1 font-['Satoshi'] text-sm text-black/72">
+                  <span className="font-['Satoshi'] text-base leading-8 text-black/68">
                     {item}
                   </span>
                 </div>
